@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STCO Co-Design Simulator v2 — 2026 Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Space Grotesk','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+
+<style>
+:root{--primary:#8b5cf6;--bg:#09090b;--sf:#18181b;--bd:#27272a;}
+*{box-sizing:border-box;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:#f4f4f5;margin:0;overflow-x:hidden;}
+input[type="range"]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;width:100%;}
+input[type="range"]::-webkit-slider-runnable-track{background:#27272a;height:5px;border-radius:3px;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;margin-top:-5px;background:#8b5cf6;height:15px;width:15px;border-radius:50%;border:2px solid #f4f4f5;}
+.scr::-webkit-scrollbar{width:4px;}
+.scr::-webkit-scrollbar-track{background:var(--bg);}
+.scr::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:3px;}
+select,input[type="number"]{background:#27272a;border:1px solid #3f3f46;border-radius:5px;color:#f4f4f5;padding:4px 6px;font-size:11px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;}
+select:focus{border-color:#8b5cf6;}
+.tb{padding:5px 10px;font-size:9px;font-weight:700;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.tb.ac{background:#8b5cf6;color:#fff;border-color:#8b5cf6;}
+.tb:not(.ac){background:var(--sf);color:#a1a1aa;border-color:var(--bd);}
+.tb:not(.ac):hover{background:#27272a;color:#f4f4f5;}
+.pn{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;}
+.pt{font-size:10px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.mc{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:2px;}
+.ml{font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;color:#52525b;font-family:'JetBrains Mono',monospace;}
+.mv{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.wb{border-radius:6px;padding:8px;font-size:10px;font-family:'JetBrains Mono',monospace;line-height:1.6;margin-bottom:4px;}
+.wc{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#fca5a5;}
+.ww{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:#fcd34d;}
+.wo{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#86efac;}
+.wi{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;}
+.coll{overflow:hidden;max-height:0;transition:max-height .4s ease;}
+.coll.open{max-height:4000px;}
+.phase{height:24px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;transition:width .5s;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ap{animation:pulse 1.5s infinite;}
+@keyframes flowDot{0%{left:0;opacity:0}20%{opacity:1}80%{opacity:1}100%{left:100%;opacity:0}}
+.fd{position:absolute;width:6px;height:6px;border-radius:50%;animation:flowDot 2s linear infinite;}
+#welcome-overlay{position:fixed;inset:0;background:rgba(9,9,11,.97);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+canvas{display:block;}
+</style>
+</head>
+<body>
+
+
+<div id="welcome-overlay">
+<div class="pn" style="max-width:650px;width:92%;border-color:#8b5cf6;border-width:2px;padding:24px;">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+<span class="material-icons" style="color:#8b5cf6;font-size:38px;">architecture</span>
+<div><h2 style="font-size:20px;font-weight:700;">STCO Co-Design Simulator v2</h2>
+<p style="font-size:10px;color:#71717a;">2026 Edition — Comprehensive Hardware-Software Co-Optimization Tool</p></div>
+</div>
+<p style="color:#a1a1aa;font-size:12px;line-height:1.7;margin-bottom:14px;">
+Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color:#f4f4f5">thermal limits</b>,
+<b style="color:#f4f4f5">memory bandwidth</b>, and <b style="color:#f4f4f5">software</b> — including
+<b style="color:#8b5cf6">Agentic AI</b>, <b style="color:#8b5cf6">Edge AI</b>,
+<b style="color:#8b5cf6">AI PC/NPU</b>, and <b style="color:#8b5cf6">Custom Silicon</b> economics.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;font-size:10px;">
+<div class="wi" style="padding:6px 8px;">⚡ 20+ hardware presets (2024-2026)</div>
+<div class="wi" style="padding:6px 8px;">🤖 Agentic AI workflow modeling</div>
+<div class="wi" style="padding:6px 8px;">💰 Full TCO & Build vs Buy analysis</div>
+<div class="wi" style="padding:6px 8px;">📊 Side-by-side comparison mode</div>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end;">
+<button onclick="document.getElementById('welcome-overlay').style.display='none';initApp()" class="tb ac" style="padding:10px 24px;font-size:12px;">
+<span class="material-icons" style="font-size:14px;vertical-align:middle;">play_circle</span> Launch Simulator</button>
+</div>
+</div>
+</div>
+
+
+<div id="app" style="display:flex;flex-direction:column;height:100vh;padding:6px 8px;">
+
+<!-- HEADER -->
+<header style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);margin-bottom:6px;flex-shrink:0;flex-wrap:wrap;gap:4px;">
+<div>
+<div style="display:flex;align-items:center;gap:5px;">
+<span style="width:7px;height:7px;border-radius:50%;background:#8b5cf6;" class="ap"></span>
+<span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:#8b5cf6;font-family:'JetBrains Mono',monospace;">STCO v2 — 2026</span>
+</div>
+<h1 style="font-size:16px;font-weight:700;">Hardware-Software Co-Design Simulator</h1>
+</div>
+<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+<button onclick="addToComparison()" class="tb" id="btn-add-cmp" title="Add to comparison">⚖️ Compare</button>
+<button onclick="exportConfig()" class="tb" title="Export JSON">📥 Export</button>
+<button onclick="captureScreenshot()" class="tb" title="Screenshot">📷</button>
+<div class="mc" style="padding:3px 8px;flex-direction:row;gap:6px;font-size:9px;">
+<span style="color:#52525b;">⚡</span><span id="hdr-bn" style="font-weight:700;color:#8b5cf6;font-size:9px;">—</span>
+</div>
+<div class="mc" style="padding:3px 8px;flex-direction:row;gap:6px;font-size:9px;">
+<span style="color:#52525b;">🌡️</span><span id="hdr-th" style="font-weight:700;color:#22c55e;font-size:9px;">Stable</span>
+</div>
+</div>
+</header>
+
+<!-- MAIN GRID -->
+<div style="display:grid;grid-template-columns:340px 1fr;gap:6px;flex-grow:1;min-height:0;overflow:hidden;">
+
+<!-- LEFT SIDEBAR -->
+<div id="sidebar" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;padding-right:3px;" class="scr">
+
+
+<div class="pn">
+<div class="pt"><span class="material-icons" style="font-size:13px;color:#f59e0b;">psychology</span> Workload Type</div>
+<select id="sel-wtype" onchange="onWorkloadTypeChange()" style="font-size:10px;">
+<option value="inference-decode">🖥️ Inference — Decode (Memory Bound)</option>
+<option value="inference-prefill">🖥️ Inference — Prefill (Compute Bound)</option>
+<option value="agentic">🤖 Agentic AI (Multi-Step)</option>
+<option value="training">🏋️ Training (Compute Heavy)</option>
+<option value="edge">📱 Edge Inference</option>
+<option value="aipc">💻 AI PC / NPU</option>
+<option value="moe">🔀 MoE Distributed (Network Bound)</option>
+</select>
+<div id="wtype-desc" style="font-size:8px;color:#52525b;margin-top:3px;line-height:1.4;">Memory-bound autoregressive decode. Batch serving, GPU ~90%.</div>
+</div>
+
+
+<div class="pn">
+<div class="pt"><span class="material-icons" style="font-size:13px;color:#ec4899;">model_training</span> AI Model</div>
+<select id="sel-model" onchange="onModelChange()" style="font-size:10px;">
+<option value="custom">— Custom Parameters —</option>
+<optgroup label="Small (7-13B)">
+<option value="llama3-8b">LLaMA 3 8B (16GB)</option>
+<option value="mistral-7b">Mistral 7B (14GB)</option>
+<option value="gemma-7b">Gemma 7B (14GB)</option>
+</optgroup>
+<optgroup label="Medium (30-70B)">
+<option value="llama3-70b" selected>LLaMA 3 70B (140GB)</option>
+<option value="mixtral-8x7b">Mixtral 8×7B MoE (94GB)</option>
+<option value="yi-34b">Yi 34B (68GB)</option>
+</optgroup>
+<optgroup label="Large (175B+)">
+<option value="gpt35-scale">GPT-3.5 scale ~175B (350GB)</option>
+<option value="gpt4-scale">GPT-4 scale ~1.8T MoE (3.6TB)</option>
+</optgroup>
+<optgroup label="Vision">
+<option value="llava-13b">LLaVA 13B (26GB)</option>
+</optgroup>
+</select>
+<div id="model-fit" style="font-size:8px;margin-top:3px;"></div>
+</div>
+
+
+<div class="pn">
+<div class="pt"><span class="material-icons" style="font-size:13px;color:#22c55e;">memory</span> Hardware Preset</div>
+<select id="sel-preset" onchange="loadPreset()" style="font-size:10px;margin-bottom:5px;">
+<option value="">— Custom —</option>
+<optgroup label="NVIDIA (2023-2025)">
+<option value="a100">A100 PCIe (7nm, 400W)</option>
+<option value="h100">H100 SXM5 (5nm, 700W)</option>
+<option value="h200">H200 (5nm, 700W, 141GB)</option>
+<option value="b100">B100 (4nm, 700W, 192GB)</option>
+<option value="b200">B200 (4nm, 1000W, 192GB)</option>
+</optgroup>
+<optgroup label="AMD">
+<option value="mi300x">MI300X (5nm, 750W)</option>
+<option value="mi350">MI350 (3nm, 750W)</option>
+</optgroup>
+<optgroup label="Intel">
+<option value="gaudi3">Gaudi 3 (5nm, 600W)</option>
+</optgroup>
+<optgroup label="Edge AI">
+<option value="jetson-orin-nx">Jetson Orin NX (25W)</option>
+<option value="jetson-agx-orin">Jetson AGX Orin (60W)</option>
+<option value="cloud-ai-100">Qualcomm Cloud AI 100 (75W)</option>
+<option value="edge-tpu">Google Edge TPU (4W)</option>
+</optgroup>
+<optgroup label="AI PC / NPU">
+<option value="core-ultra">Intel Core Ultra NPU</option>
+<option value="ryzen-ai">AMD Ryzen AI NPU</option>
+<option value="snapdragon-x">Snapdragon X Elite NPU</option>
+<option value="apple-m4">Apple M4 Neural Engine</option>
+</optgroup>
+<optgroup label="Custom">
+<option value="custom-silicon">🔧 Design Custom ASIC</option>
+</optgroup>
+</select>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;">
+<div><label style="font-size:8px;color:#52525b;">Node</label>
+<select id="sel-node" onchange="runSim()">
+<option value="2nm">2nm</option><option value="3nm">3nm</option><option value="4nm">4nm</option>
+<option value="5nm" selected>5nm</option><option value="7nm">7nm</option><option value="14nm">14nm</option>
+</select></div>
+<div><label style="font-size:8px;color:#52525b;">Packaging</label>
+<select id="sel-pkg" onchange="runSim()">
+<option value="monolithic">Monolithic</option><option value="2.5d" selected>2.5D CoWoS</option><option value="3d">3D Stack</option>
+</select></div>
+<div><label style="font-size:8px;color:#52525b;">Memory</label>
+<select id="sel-mem" onchange="runSim()">
+<option value="hbm4">HBM4 (3200)</option><option value="hbm3e" selected>HBM3e (4800)</option><option value="hbm3">HBM3 (3350)</option>
+<option value="hbm2e">HBM2e (2000)</option><option value="lpddr5">LPDDR5 (100)</option><option value="ddr5">DDR5 (80)</option>
+</select></div>
+<div><label style="font-size:8px;color:#52525b;">Link</label>
+<select id="sel-link" onchange="runSim()">
+<option value="nvlink5">NVLink5 (900)</option><option value="nvlink4">NVLink4 (450)</option>
+<option value="ualink">UALink (400)</option><option value="pcie6" selected>PCIe6 (128)</option>
+<option value="pcie5">PCIe5 (64)</option><option value="usb">USB (5)</option>
+</select></div>
+<div><label style="font-size:8px;color:#52525b;">Precision</label>
+<select id="sel-prec" onchange="runSim()">
+<option value="fp32">FP32</option><option value="fp16">FP16/BF16</option><option value="fp8" selected>FP8</option>
+<option value="fp4">FP4/MXFP4</option><option value="int8">INT8</option><option value="int4">INT4</option>
+</select></div>
+<div><label style="font-size:8px;color:#52525b;">Cooling</label>
+<select id="sel-cool" onchange="runSim()">
+<option value="liquid">Liquid</option><option value="air" selected>Air</option><option value="passive">Passive</option>
+</select></div>
+</div>
+<!-- Sliders -->
+<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Clock (MHz)</span><span id="lbl-freq" style="color:#8b5cf6;font-weight:700;">1400</span></div>
+<input type="range" id="sld-freq" min="200" max="2500" step="50" value="1400" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>TDP (W)</span><span id="lbl-tdp" style="color:#ef4444;font-weight:700;">700</span></div>
+<input type="range" id="sld-tdp" min="2" max="1200" step="5" value="700" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Cores</span><span id="lbl-cores" style="color:#22c55e;font-weight:700;">16896</span></div>
+<input type="range" id="sld-cores" min="64" max="32768" step="64" value="16896" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Mem Cap (GB)</span><span id="lbl-memcap" style="color:#f59e0b;font-weight:700;">80</span></div>
+<input type="range" id="sld-memcap" min="1" max="512" step="1" value="80" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Batch Size</span><span id="lbl-batch" style="color:#ec4899;font-weight:700;">32</span></div>
+<input type="range" id="sld-batch" min="1" max="512" step="1" value="32" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Compiler Fusion</span><span id="lbl-fusion" style="color:#06b6d4;font-weight:700;">30%</span></div>
+<input type="range" id="sld-fusion" min="0" max="100" step="5" value="30" oninput="runSim()"></div>
+</div>
+</div>
+
+
+<div class="pn">
+<div class="pt"><span class="material-icons" style="font-size:13px;color:#06b6d4;">speed</span> Optimize For</div>
+<div style="display:flex;gap:3px;">
+<button id="btn-thr" onclick="setOptMode('throughput')" class="tb ac" style="flex:1;font-size:8px;">⚡ Throughput</button>
+<button id="btn-lat" onclick="setOptMode('latency')" class="tb" style="flex:1;font-size:8px;">⏱️ Latency</button>
+</div>
+</div>
+
+
+<div class="pn" style="cursor:pointer;" onclick="toggleColl('econ-body')">
+<div class="pt" style="margin-bottom:0;"><span class="material-icons" style="font-size:13px;color:#eab308;">attach_money</span> Economics Inputs <span class="material-icons" style="font-size:12px;color:#52525b;margin-left:auto;" id="econ-arrow">expand_more</span></div>
+</div>
+<div id="econ-body" class="coll" style="background:var(--sf);border:1px solid var(--bd);border-top:0;border-radius:0 0 8px 8px;margin-top:-5px;">
+<div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+<div><label style="font-size:8px;color:#52525b;">$/kWh</label><input type="number" id="inp-elec" value="0.12" step="0.01" min="0" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:#52525b;">PUE</label><input type="number" id="inp-pue" value="1.3" step="0.1" min="1" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:#52525b;">Years</label><input type="number" id="inp-years" value="3" min="1" max="10" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:#52525b;">GPU Count</label><input type="number" id="inp-gpus" value="8" min="1" max="1024" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:#52525b;">Prod Volume</label><input type="number" id="inp-vol" value="1" min="1" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:#52525b;">Eng Cost (K$)</label><input type="number" id="inp-engcost" value="180" min="50" onchange="runSim()"></div>
+</div>
+</div>
+
+
+<div class="pn">
+<div class="pt"><span class="material-icons" style="font-size:13px;color:#a855f7;">book</span> Book Scenarios</div>
+<select id="sel-case" onchange="loadCaseStudy()" style="font-size:10px;">
+<option value="">— Select Scenario —</option>
+<optgroup label="Case Studies">
+<option value="cs-h100-cluster">Ch.8: H100 Cluster Power Analysis</option>
+<option value="cs-dvfs">Ch.8: DVFS Power-Performance Tradeoff</option>
+<option value="cs-hbm-compare">Ch.10: HBM3 vs HBM3e vs HBM4</option>
+<option value="cs-bottleneck">Ch.11: Memory vs Compute Bottleneck</option>
+<option value="cs-agentic">Ch.14: Agentic vs Traditional Inference</option>
+<option value="cs-buildvbuy">Ch.16: Custom Silicon Build vs Buy</option>
+</optgroup>
+<optgroup label="Exercises">
+<option value="ex-dvfs">Ex 8.1: Explore DVFS Tradeoff</option>
+<option value="ex-iceberg">Ex 8.2: Power Iceberg for Your Facility</option>
+<option value="ex-memhier">Ex 10.1: Memory Hierarchy Optimization</option>
+<option value="ex-hbmcost">Ex 10.2: HBM vs DDR Cost-Performance</option>
+<option value="ex-workload">Ex 11.1: Determine Your Bottleneck</option>
+<option value="ex-agentic">Ex 11.2: Agentic vs Traditional Comparison</option>
+</optgroup>
+</select>
+<div id="case-desc" style="font-size:8px;color:#52525b;margin-top:3px;line-height:1.4;"></div>
+</div>
+
+</div><!-- end sidebar -->
+
+<!-- RIGHT PANEL -->
+<div style="display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;">
+
+<!-- Tab Bar -->
+<div style="display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;">
+<button onclick="showTab('perf')" class="tb ac" id="tab-perf">📊 Performance</button>
+<button onclick="showTab('analysis')" class="tb" id="tab-analysis">🔍 Analysis</button>
+<button onclick="showTab('econ')" class="tb" id="tab-econ">💰 Economics</button>
+<button onclick="showTab('agentic')" class="tb" id="tab-agentic">🤖 Agentic AI</button>
+<button onclick="showTab('compare')" class="tb" id="tab-compare">⚖️ Compare</button>
+</div>
+
+<!-- Metric Cards Row -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;flex-shrink:0;" id="metrics-row">
+<div class="mc"><span class="ml">Bottleneck</span><span class="mv" id="m-bn" style="font-size:10px;color:#8b5cf6;">—</span></div>
+<div class="mc"><span class="ml">Performance</span><span class="mv" id="m-perf" style="color:#8b5cf6;">—</span></div>
+<div class="mc"><span class="ml">Power</span><span class="mv" id="m-pwr" style="color:#f59e0b;">—</span></div>
+<div class="mc"><span class="ml">Temp</span><span class="mv" id="m-tmp" style="color:#22c55e;">—</span></div>
+<div class="mc"><span class="ml">Tokens/s</span><span class="mv" id="m-tok" style="color:#ec4899;">—</span></div>
+</div>
+
+<!-- TAB: Performance -->
+<div id="view-perf" style="flex-grow:1;display:grid;grid-template-columns:1fr 1fr;gap:5px;min-height:0;overflow:hidden;">
+<div style="position:relative;background:var(--bg);border:1px solid var(--bd);border-radius:8px;overflow:hidden;">
+<div style="position:absolute;top:4px;left:6px;z-index:10;font-size:8px;font-family:'JetBrains Mono',monospace;color:#71717a;background:rgba(9,9,11,.8);padding:2px 6px;border-radius:4px;">Roofline Model</div>
+<canvas id="cvRoofline"></canvas>
+</div>
+<div style="position:relative;background:var(--bg);border:1px solid var(--bd);border-radius:8px;overflow:hidden;">
+<div style="position:absolute;top:4px;left:6px;z-index:10;font-size:8px;font-family:'JetBrains Mono',monospace;color:#71717a;background:rgba(9,9,11,.8);padding:2px 6px;border-radius:4px;">Silicon & Thermal</div>
+<canvas id="cvSilicon"></canvas>
+</div>
+</div>
+
+<!-- TAB: Analysis -->
+<div id="view-analysis" style="flex-grow:1;overflow-y:auto;display:none;gap:5px;" class="scr">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+<!-- Bottleneck Analysis -->
+<div class="pn" id="panel-bottleneck"></div>
+<!-- Validation Warnings -->
+<div class="pn" id="panel-warnings"></div>
+</div>
+<!-- Token Throughput -->
+<div class="pn" id="panel-tokens" style="margin-top:5px;"></div>
+<!-- Latency Analysis -->
+<div class="pn" id="panel-latency" style="margin-top:5px;"></div>
+<!-- CODF Decision Tree -->
+<div class="pn" id="panel-codf" style="margin-top:5px;"></div>
+</div>
+
+<!-- TAB: Economics -->
+<div id="view-econ" style="flex-grow:1;overflow-y:auto;display:none;gap:5px;" class="scr">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+<div class="pn" id="panel-tco"></div>
+<div class="pn" id="panel-iceberg"></div>
+</div>
+<div class="pn" id="panel-buildvbuy" style="margin-top:5px;"></div>
+<div class="pn" id="panel-swcost" style="margin-top:5px;"></div>
+</div>
+
+<!-- TAB: Agentic AI -->
+<div id="view-agentic" style="flex-grow:1;overflow-y:auto;display:none;" class="scr">
+<div class="pn" id="panel-agentic-flow"></div>
+<div class="pn" id="panel-agentic-econ" style="margin-top:5px;"></div>
+<div class="pn" id="panel-agentic-compare" style="margin-top:5px;"></div>
+</div>
+
+<!-- TAB: Compare -->
+<div id="view-compare" style="flex-grow:1;overflow-y:auto;display:none;" class="scr">
+<div class="pn" id="panel-compare">
+<div class="pt">⚖️ Side-by-Side Comparison</div>
+<p style="font-size:10px;color:#52525b;">Click "⚖️ Compare" button to add current configuration (up to 3).</p>
+</div>
+</div>
+
+<!-- Insight bar -->
+<div class="pn" style="flex-shrink:0;max-height:80px;overflow-y:auto;" class="scr">
+<div style="display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:#71717a;margin-bottom:3px;">
+<span class="material-icons" style="font-size:12px;color:#8b5cf6;">psychology</span> Real-time Analysis
+</div>
+<div id="insight-box" style="font-size:9px;color:#a1a1aa;font-family:'JetBrains Mono',monospace;line-height:1.5;">
+Configure hardware and workload above to see analysis.
+</div>
+</div>
+
+</div><!-- end right panel -->
+
+</div><!-- end main grid -->
+</div><!-- end app -->
+
+<script>
+const HW_DB = {"h100": {"name": "NVIDIA H100 SXM5", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3", "memBW": 3350, "memCap": 80, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 25000}, "h200": {"name": "NVIDIA H200", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3e", "memBW": 4800, "memCap": 141, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 30000}, "b100": {"name": "NVIDIA B100", "node": "4nm", "pkg": "2.5d", "freq": 1800, "tdp": 700, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 18432, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 35000}, "b200": {"name": "NVIDIA B200", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 40000}, "a100": {"name": "NVIDIA A100 PCIe", "node": "7nm", "pkg": "monolithic", "freq": 1410, "tdp": 400, "memType": "hbm2e", "memBW": 2000, "memCap": 80, "cores": 6912, "interconnect": "pcie5", "precision": "fp16", "cooling": "air", "category": "datacenter", "year": 2020, "costEst": 10000}, "mi300x": {"name": "AMD MI300X", "node": "5nm", "pkg": "3d", "freq": 1700, "tdp": 750, "memType": "hbm3", "memBW": 5300, "memCap": 192, "cores": 19456, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 22000}, "mi350": {"name": "AMD MI350", "node": "3nm", "pkg": "3d", "freq": 1900, "tdp": 750, "memType": "hbm3e", "memBW": 6000, "memCap": 288, "cores": 20480, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 28000}, "gaudi3": {"name": "Intel Gaudi 3", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 600, "memType": "hbm2e", "memBW": 3700, "memCap": 128, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 15000}, "jetson-orin-nx": {"name": "Jetson Orin NX", "node": "7nm", "pkg": "monolithic", "freq": 918, "tdp": 25, "memType": "lpddr5", "memBW": 100, "memCap": 16, "cores": 1024, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 500}, "jetson-agx-orin": {"name": "Jetson AGX Orin", "node": "7nm", "pkg": "monolithic", "freq": 1300, "tdp": 60, "memType": "lpddr5", "memBW": 205, "memCap": 64, "cores": 2048, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 1200}, "cloud-ai-100": {"name": "Qualcomm Cloud AI 100", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 75, "memType": "ddr5", "memBW": 134, "memCap": 32, "cores": 4096, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 800}, "edge-tpu": {"name": "Google Edge TPU", "node": "14nm", "pkg": "monolithic", "freq": 500, "tdp": 4, "memType": "ddr5", "memBW": 8, "memCap": 2, "cores": 256, "interconnect": "usb", "precision": "int8", "cooling": "passive", "category": "edge", "year": 2022, "costEst": 75}, "core-ultra": {"name": "Intel Core Ultra NPU", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 400, "tops": 34}, "ryzen-ai": {"name": "AMD Ryzen AI NPU", "node": "4nm", "pkg": "monolithic", "freq": 1600, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 350, "tops": 16}, "snapdragon-x": {"name": "Snapdragon X Elite NPU", "node": "4nm", "pkg": "monolithic", "freq": 1800, "tdp": 23, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 500, "tops": 45}, "apple-m4": {"name": "Apple M4 Neural Engine", "node": "3nm", "pkg": "monolithic", "freq": 2000, "tdp": 22, "memType": "lpddr5", "memBW": 120, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "fp16", "cooling": "passive", "category": "aipc", "year": 2024, "costEst": 600, "tops": 18}};
+const MODEL_DB = {"llama3-8b": {"name": "LLaMA 3 8B", "params": 8000000000.0, "memGB": 16, "intensity": 0.15, "batchDefault": 64}, "mistral-7b": {"name": "Mistral 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.15, "batchDefault": 64}, "gemma-7b": {"name": "Gemma 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.14, "batchDefault": 64}, "llama3-70b": {"name": "LLaMA 3 70B", "params": 70000000000.0, "memGB": 140, "intensity": 0.12, "batchDefault": 32}, "mixtral-8x7b": {"name": "Mixtral 8\u00d77B", "params": 47000000000.0, "memGB": 94, "intensity": 0.13, "batchDefault": 32}, "yi-34b": {"name": "Yi 34B", "params": 34000000000.0, "memGB": 68, "intensity": 0.13, "batchDefault": 32}, "gpt35-scale": {"name": "GPT-3.5 Scale (~175B)", "params": 175000000000.0, "memGB": 350, "intensity": 0.1, "batchDefault": 16}, "gpt4-scale": {"name": "GPT-4 Scale (~1.8T MoE)", "params": 1800000000000.0, "memGB": 3600, "intensity": 0.08, "batchDefault": 8}, "llava-13b": {"name": "LLaVA 13B", "params": 13000000000.0, "memGB": 26, "intensity": 0.18, "batchDefault": 32}};
+
+// ============================================
+// STATE
+// ============================================
+let optMode = 'throughput';
+let comparisonSlots = [];
+let simResult = {};
+
+// ============================================
+// DOM HELPERS
+// ============================================
+const $ = id => document.getElementById(id);
+const val = id => {const e=$(id); return e.tagName==='SELECT'?e.value:e.type==='range'?parseFloat(e.value):parseFloat(e.value);}
+
+function showTab(name) {
+    ['perf','analysis','econ','agentic','compare'].forEach(t => {
+        const v = $('view-'+t);
+        const b = $('tab-'+t);
+        if(t===name){v.style.display=t==='perf'?'grid':'block';b.classList.add('ac');}
+        else{v.style.display='none';b.classList.remove('ac');}
+    });
+    if(name==='perf') resizeCanvases();
+}
+
+function setOptMode(mode) {
+    optMode = mode;
+    $('btn-thr').classList.toggle('ac', mode==='throughput');
+    $('btn-lat').classList.toggle('ac', mode==='latency');
+    runSim();
+}
+
+function toggleColl(id) {
+    const el = $(id);
+    el.classList.toggle('open');
+    const arrow = $('econ-arrow');
+    if(arrow) arrow.textContent = el.classList.contains('open') ? 'expand_less' : 'expand_more';
+}
+
+function initApp() {
+    resizeCanvases();
+    runSim();
+}
+
+// ============================================
+// PRESET LOADING
+// ============================================
+function loadPreset() {
+    const key = val('sel-preset');
+    if(!key || key==='custom-silicon') {
+        if(key==='custom-silicon') showCustomSiliconMode();
+        return;
+    }
+    const hw = HW_DB[key];
+    if(!hw) return;
+    $('sel-node').value = hw.node;
+    $('sel-pkg').value = hw.pkg;
+    $('sel-mem').value = hw.memType;
+    $('sel-link').value = hw.interconnect;
+    $('sel-prec').value = hw.precision;
+    $('sel-cool').value = hw.cooling;
+    $('sld-freq').value = hw.freq;
+    $('sld-tdp').value = hw.tdp;
+    $('sld-cores').value = hw.cores;
+    $('sld-memcap').value = hw.memCap;
+    // Set workload type based on category
+    if(hw.category==='edge') $('sel-wtype').value='edge';
+    else if(hw.category==='aipc') $('sel-wtype').value='aipc';
+    else $('sel-wtype').value='inference-decode';
+    runSim();
+}
+
+function showCustomSiliconMode() {
+    // Just allow all sliders to be free-form
+    runSim();
+}
+
+function onWorkloadTypeChange() {
+    const wt = val('sel-wtype');
+    const descs = {
+        'inference-decode': 'Memory-bound autoregressive decode. Batch serving, GPU ~90%.',
+        'inference-prefill': 'Compute-bound prompt processing. High FLOPS utilization.',
+        'agentic': 'Multi-step AI agent: planning→routing→tools→reasoning. GPU idle ~79% of time.',
+        'training': 'Compute-heavy forward+backward passes. Large batches, high GPU util.',
+        'edge': 'Power-constrained inference. Latency-critical, small batches.',
+        'aipc': 'On-device NPU inference. Battery-aware, privacy-focused.',
+        'moe': 'Mixture-of-Experts with cross-GPU routing. Network-bound.'
+    };
+    $('wtype-desc').textContent = descs[wt] || '';
+    if(wt==='agentic') showTab('agentic');
+    runSim();
+}
+
+function onModelChange() {
+    const mk = val('sel-model');
+    if(mk==='custom') {runSim(); return;}
+    const m = MODEL_DB[mk];
+    if(!m) return;
+    $('sld-batch').value = m.batchDefault;
+    runSim();
+}
+
+function loadCaseStudy() {
+    const cs = val('sel-case');
+    const cases = {
+        'cs-h100-cluster': {preset:'h100',wtype:'inference-decode',desc:'Chapter 8: Analyze H100 cluster power draw at 700W TDP with liquid cooling. Observe thermal behavior and power efficiency.'},
+        'cs-dvfs': {preset:'h100',wtype:'inference-decode',desc:'Chapter 8: Try changing clock from 2000→1200 MHz. Watch power drop quadratically while perf drops linearly. This is DVFS.', freq:2000},
+        'cs-hbm-compare': {preset:'h100',wtype:'inference-decode',desc:'Chapter 10: Compare HBM3 vs HBM3e vs HBM4. Switch memory type and observe throughput impact on memory-bound workloads.'},
+        'cs-bottleneck': {preset:'h100',wtype:'inference-decode',desc:'Chapter 11: Switch between prefill (compute-bound) and decode (memory-bound) to see how bottleneck shifts on roofline.'},
+        'cs-agentic': {preset:'h100',wtype:'agentic',desc:'Chapter 14: Compare agentic AI (21% GPU util) vs traditional inference (90% GPU util). See the economics shift.'},
+        'cs-buildvbuy': {preset:'h100',wtype:'inference-decode',desc:'Chapter 16: Compare buying H100s vs designing custom silicon. When does build make sense? Check the Economics tab.'},
+        'ex-dvfs': {preset:'h100',wtype:'inference-decode',desc:'Exercise 8.1: Slide clock frequency from 800→2200 MHz. Note how power scales with V²f while perf scales linearly.',freq:800},
+        'ex-iceberg': {preset:'h100',wtype:'inference-decode',desc:'Exercise 8.2: Check the Economics tab → Power Iceberg. Adjust PUE to see how facility overhead multiplies chip power cost.'},
+        'ex-memhier': {preset:'h100',wtype:'inference-decode',desc:'Exercise 10.1: Switch memory from DDR5→HBM3→HBM3e→HBM4. Watch the memory ceiling rise on the roofline.'},
+        'ex-hbmcost': {preset:'a100',wtype:'inference-decode',desc:'Exercise 10.2: Compare A100 (HBM2e) vs H200 (HBM3e) in Economics tab for cost-performance analysis.'},
+        'ex-workload': {preset:'h100',wtype:'inference-decode',desc:'Exercise 11.1: Switch workload types and observe which resource becomes the bottleneck. Check Analysis tab.'},
+        'ex-agentic': {preset:'h100',wtype:'agentic',desc:'Exercise 11.2: Open Agentic AI tab. Compare GPU utilization and cost per query vs traditional inference.'},
+    };
+    const c = cases[cs];
+    if(!c) {$('case-desc').textContent=''; return;}
+    $('case-desc').textContent = c.desc;
+    if(c.preset) {$('sel-preset').value=c.preset; loadPreset();}
+    if(c.wtype) {$('sel-wtype').value=c.wtype;}
+    if(c.freq) {$('sld-freq').value=c.freq;}
+    runSim();
+    if(cs.startsWith('cs-agentic')||cs.startsWith('ex-agentic')) showTab('agentic');
+    else if(cs.includes('iceberg')||cs.includes('hbmcost')||cs.includes('buildvbuy')) showTab('econ');
+    else if(cs.includes('bottleneck')||cs.includes('workload')) showTab('analysis');
+}
+
+// ============================================
+// CORE SIMULATION ENGINE
+// ============================================
+function runSim() {
+    // Read all inputs
+    const node = val('sel-node');
+    const pkg = val('sel-pkg');
+    const memType = val('sel-mem');
+    const link = val('sel-link');
+    const prec = val('sel-prec');
+    const cool = val('sel-cool');
+    let freq = val('sld-freq');
+    const tdpLimit = val('sld-tdp');
+    const cores = val('sld-cores');
+    const memCap = val('sld-memcap');
+    const batch = val('sld-batch');
+    const fusion = val('sld-fusion');
+    const wtype = val('sel-wtype');
+    const modelKey = val('sel-model');
+
+    // Update labels
+    $('lbl-freq').textContent = freq;
+    $('lbl-tdp').textContent = tdpLimit;
+    $('lbl-cores').textContent = cores;
+    $('lbl-memcap').textContent = memCap;
+    $('lbl-batch').textContent = batch;
+    $('lbl-fusion').textContent = fusion + '%';
+
+    // Node parameters
+    const nodeParams = {
+        '2nm': {capScale:0.50, vdd:0.65, leakBase:90, yieldFactor:0.45},
+        '3nm': {capScale:0.60, vdd:0.72, leakBase:70, yieldFactor:0.55},
+        '4nm': {capScale:0.70, vdd:0.75, leakBase:55, yieldFactor:0.65},
+        '5nm': {capScale:0.85, vdd:0.80, leakBase:40, yieldFactor:0.72},
+        '7nm': {capScale:1.00, vdd:0.85, leakBase:25, yieldFactor:0.80},
+        '14nm':{capScale:1.60, vdd:1.00, leakBase:15, yieldFactor:0.90},
+    };
+    const np = nodeParams[node] || nodeParams['5nm'];
+
+    // Packaging
+    const pkgParams = {
+        'monolithic': {factor:1.0, thermMult:1.0},
+        '2.5d': {factor:0.95, thermMult:1.1},
+        '3d': {factor:1.15, thermMult:1.9}
+    };
+    const pp = pkgParams[pkg] || pkgParams['monolithic'];
+
+    // Memory BW (GB/s)
+    const memBWMap = {hbm4:3200, hbm3e:4800, hbm3:3350, hbm2e:2000, lpddr5:100, ddr5:80};
+    let memBW = memBWMap[memType] || 2000;
+    if(pkg==='3d' && memBW > 200) memBW *= 1.2;
+
+    // Link BW (GB/s)
+    const linkBWMap = {nvlink5:900, nvlink4:450, ualink:400, pcie6:128, pcie5:64, usb:5};
+    const linkBW = linkBWMap[link] || 128;
+
+    // Precision multipliers
+    const precMult = {fp32:1, fp16:2, fp8:4, fp4:8, int8:4, int4:8};
+    const precBytes = {fp32:4, fp16:2, fp8:1, fp4:0.5, int8:1, int4:0.5};
+    const pm = precMult[prec] || 2;
+    const pb = precBytes[prec] || 2;
+
+    // Compute peak TFLOPS - calibrated to known hardware
+    // H100 reference: 16896 cores @ 1980 MHz → 989 TFLOPS FP16, 1979 FP8
+    // Base TFLOPS at FP16: cores * freq * calibFactor
+    // calibFactor = 989 / (16896 * 1980) = 0.02956 per core-MHz for FP16
+    const calibFactor = 0.0000296; // TFLOPS per (core * MHz) at FP16
+    const precTFLOPSMult = {fp32:0.5, fp16:1, fp8:2, fp4:4, int8:2, int4:4};
+    const ptm = precTFLOPSMult[prec] || 1;
+    const rawPeakTFLOPS = cores * freq * calibFactor * ptm;
+
+    // Memory BW in TB/s (raw)
+    const memBWTBS = memBW / 1000;
+    // Effective memory BW accounts for lower precision = more useful ops per byte transferred
+    const effectiveMemBWTBS = memBWTBS;
+
+    // Workload arithmetic intensity
+    const wtIntensity = {
+        'inference-decode': 0.15, 'inference-prefill': 50, 'agentic': 0.15,
+        'training': 100, 'edge': 0.3, 'aipc': 0.25, 'moe': 0.5
+    };
+    let baseIntensity = wtIntensity[wtype] || 0.15;
+
+    // Model adjustments
+    const model = MODEL_DB[modelKey];
+    if(model && modelKey !== 'custom') baseIntensity = model.intensity;
+
+    // Compiler fusion boost
+    const fusionBoost = 1.0 + (fusion / 100) * 3.0;
+    const effectiveIntensity = baseIntensity * fusionBoost;
+
+    // Network weight
+    const commWeight = wtype === 'moe' ? 0.75 : 0;
+
+    // Thermal solver (iterative DVFS)
+    let simFreq = freq;
+    let simVdd = np.vdd;
+    let thermalThrottle = false;
+    let powerThrottle = false;
+    const coolTRes = cool === 'liquid' ? 0.025 : (cool === 'passive' ? 0.25 : 0.12);
+    const totalTRes = coolTRes + 0.015 * pp.thermMult;
+    const maxTj = cool === 'passive' ? 80 : 90;
+    let jTemp = 25;
+    let totalPower = 10;
+
+    for(let i = 0; i < 15; i++) {
+        const fRatio = simFreq / 1400;
+        const coreScale = Math.pow(cores/16896, 0.7); // sub-linear power scaling
+        const dynPow = 300 * np.capScale * fRatio * (simVdd * simVdd) * pp.factor * coreScale;
+        const leakPow = np.leakBase * Math.exp((jTemp - 25) / 45) * coreScale;
+        const memPow = (memBW / 1000) * 15;
+        const linkPow = (linkBW / 1000) * 12 * (commWeight > 0 ? 1 : 0.08);
+        totalPower = dynPow + leakPow + memPow + linkPow;
+        jTemp = 25 + totalPower * totalTRes;
+
+        if((jTemp > maxTj || totalPower > tdpLimit) && simFreq > 400) {
+            thermalThrottle = jTemp > maxTj;
+            powerThrottle = totalPower > tdpLimit;
+            simFreq -= 100;
+            simVdd = np.vdd * Math.sqrt(simFreq / freq);
+        } else break;
+    }
+
+    // Final compute
+    const finalTFLOPS = cores * simFreq * calibFactor * ptm;
+
+    // Roofline
+    const computeCeil = finalTFLOPS;
+    const memCeil = effectiveIntensity * effectiveMemBWTBS;
+    const netCeil = commWeight > 0 ? (effectiveIntensity * (linkBW/1000)) / commWeight : Infinity;
+    const attained = Math.min(computeCeil, memCeil, netCeil);
+
+    // Bottleneck
+    let bottleneck = 'Compute';
+    if(attained === memCeil) bottleneck = 'Memory BW';
+    else if(attained === netCeil) bottleneck = 'Network';
+    if(thermalThrottle) bottleneck += ' ⚠️ THROTTLE';
+    else if(powerThrottle) bottleneck += ' ⚠️ PWR LIMIT';
+
+    // Utilization percentages
+    const computeUtil = Math.min(100, (attained / computeCeil) * 100);
+    const memUtil = memCeil < Infinity ? Math.min(100, (attained / (effectiveIntensity * effectiveMemBWTBS)) * 100) : 0;
+    const thermalUtil = (totalPower / tdpLimit) * 100;
+
+    // Token throughput calculation
+    const modelMem = model ? model.memGB : memCap * 0.8;
+    const fitsInMem = modelMem <= memCap;
+    const modelParams = model ? model.params : 70e9;
+    // Prefill: compute-bound → TFLOPS / (2 * params)
+    const prefillTokPerSec = (attained * 1e12) / (2 * modelParams);
+    // Decode: memory-bound → memBW_bytes / (model_bytes_per_token)
+    // Each token generation reads full model weights once: params * bytes_per_param
+    const modelBytesPerParam = pb;
+    const decodeTokPerSecPerUser = memBW * 1e9 / (modelParams * modelBytesPerParam);
+    const decodeTokPerSec = decodeTokPerSecPerUser * Math.min(batch, 128);
+    const tokPerSec = wtype.includes('prefill') || wtype === 'training' ? prefillTokPerSec : decodeTokPerSec;
+    const latencyPerTok = decodeTokPerSec > 0 ? (1000 / (decodeTokPerSec / batch)) : 999;
+
+    // Economics
+    const elecRate = parseFloat($('inp-elec').value) || 0.12;
+    const pue = parseFloat($('inp-pue').value) || 1.3;
+    const years = parseInt($('inp-years').value) || 3;
+    const gpuCount = parseInt($('inp-gpus').value) || 8;
+    const prodVol = parseInt($('inp-vol').value) || 1;
+    const engCostK = parseInt($('inp-engcost').value) || 180;
+
+    const presetKey = val('sel-preset');
+    const hwCost = HW_DB[presetKey] ? HW_DB[presetKey].costEst : 4200;
+
+    const hoursPerYear = 8760;
+    const chipPowerKW = (totalPower * gpuCount) / 1000;
+    const gridPowerKW = chipPowerKW * pue;
+    const annualPowerCost = gridPowerKW * hoursPerYear * elecRate;
+    const totalPowerCost = annualPowerCost * years;
+    const hwCapex = hwCost * gpuCount;
+    const infraCost = hwCapex * 0.2; // chassis, networking, storage
+    const totalCapex = hwCapex + infraCost;
+    const maintenanceCost = totalCapex * 0.1 * years;
+    const totalTCO = totalCapex + totalPowerCost + maintenanceCost;
+
+    // Custom silicon NRE
+    const swNRE = 40 * engCostK * 1000 * 3; // 40 engineers, 3 years
+    const siliconNRE = 45e6; // design
+    const tapeoutCost = 20e6;
+    const totalNRE = swNRE + siliconNRE + tapeoutCost;
+    const unitCost = 482; // per chip recurring
+    const breakEvenUnits = Math.ceil(totalNRE / (hwCost - unitCost));
+
+    // Power iceberg
+    const vrmLoss = 0.08;
+    const psuLoss = 0.10;
+    const chipToGrid = (1 + vrmLoss) * (1 + psuLoss) * pue;
+
+    // Agentic AI modeling
+    const agenticPhases = [
+        {name:'Orchestration', duration:2.5, cpu:85, gpu:5, net:10, color:'#3b82f6'},
+        {name:'Router LLM', duration:0.3, cpu:20, gpu:60, net:5, color:'#8b5cf6'},
+        {name:'Tool Execution', duration:3.2, cpu:70, gpu:0, net:90, color:'#f59e0b'},
+        {name:'Reasoning', duration:0.8, cpu:15, gpu:90, net:5, color:'#22c55e'},
+        {name:'Synthesis', duration:0.4, cpu:10, gpu:88, net:5, color:'#ec4899'},
+    ];
+    const agenticTotal = agenticPhases.reduce((s,p) => s+p.duration, 0);
+    const gpuActiveTime = agenticPhases.reduce((s,p) => s + (p.gpu > 30 ? p.duration : 0), 0);
+    const gpuUtilAgentic = (gpuActiveTime / agenticTotal) * 100;
+    const tradLatency = 1.2;
+    const tradQueriesPerHr = 3600 / tradLatency;
+    const agenticQueriesPerHr = 3600 / agenticTotal;
+
+    // Store result
+    simResult = {
+        node, pkg, memType, link, prec, cool, freq, simFreq, tdpLimit, cores, memCap, batch, fusion,
+        wtype, modelKey, rawPeakTFLOPS, finalTFLOPS, memBW, linkBW, effectiveIntensity, baseIntensity,
+        computeCeil, memCeil, netCeil, attained, bottleneck, computeUtil, memUtil, thermalUtil,
+        totalPower, jTemp, thermalThrottle, powerThrottle,
+        prefillTokPerSec, decodeTokPerSec, decodeTokPerSecPerUser, tokPerSec, latencyPerTok, fitsInMem, modelMem: modelMem,
+        elecRate, pue, years, gpuCount, hwCost, totalCapex, totalPowerCost, maintenanceCost, totalTCO,
+        swNRE, totalNRE, unitCost, breakEvenUnits, chipToGrid, vrmLoss, psuLoss,
+        agenticPhases, agenticTotal, gpuUtilAgentic, tradLatency, tradQueriesPerHr, agenticQueriesPerHr,
+        effectiveMemBWTBS, commWeight, np, pm, pb
+    };
+
+    // Update all UI
+    updateMetrics();
+    updateBottleneckPanel();
+    updateWarningsPanel();
+    updateTokenPanel();
+    updateLatencyPanel();
+    updateCODFPanel();
+    updateTCOPanel();
+    updateIcebergPanel();
+    updateBuildBuyPanel();
+    updateSWCostPanel();
+    updateAgenticPanels();
+    updateInsights();
+    drawRoofline();
+    drawSilicon();
+
+    // Header badges
+    $('hdr-bn').textContent = bottleneck.replace('⚠️','').trim();
+    $('hdr-bn').style.color = bottleneck.includes('Memory') ? '#f59e0b' : bottleneck.includes('Network') ? '#14b8a6' : '#8b5cf6';
+    $('hdr-th').textContent = thermalThrottle ? 'THROTTLE' : (jTemp > 75 ? 'Warning' : 'Stable');
+    $('hdr-th').style.color = thermalThrottle ? '#ef4444' : (jTemp > 75 ? '#f59e0b' : '#22c55e');
+}
+
+// ============================================
+// UI UPDATE FUNCTIONS
+// ============================================
+function updateMetrics() {
+    const r = simResult;
+    $('m-bn').textContent = r.bottleneck.replace('⚠️','').trim().substring(0,18);
+    $('m-bn').style.color = r.bottleneck.includes('Memory') ? '#f59e0b' : r.bottleneck.includes('Network') ? '#14b8a6' : '#8b5cf6';
+    $('m-perf').textContent = r.attained >= 10 ? r.attained.toFixed(0) + ' TF' : r.attained.toFixed(1) + ' TF';
+    $('m-pwr').textContent = r.totalPower.toFixed(0) + ' W';
+    $('m-pwr').style.color = r.totalPower > r.tdpLimit ? '#ef4444' : '#f59e0b';
+    $('m-tmp').textContent = r.jTemp.toFixed(0) + '°C';
+    $('m-tmp').style.color = r.jTemp > 85 ? '#ef4444' : (r.jTemp > 70 ? '#f59e0b' : '#22c55e');
+    $('m-tok').textContent = r.tokPerSec > 1000 ? (r.tokPerSec/1000).toFixed(1)+'K' : r.tokPerSec.toFixed(0);
+
+    // Model fit
+    const fitEl = $('model-fit');
+    if(r.fitsInMem) fitEl.innerHTML = '<span style="color:#22c55e;">✓ Model fits ('+ r.modelMem.toFixed(0) +'GB / '+ r.memCap +'GB)</span>';
+    else fitEl.innerHTML = '<span style="color:#ef4444;">✗ Model too large ('+ r.modelMem.toFixed(0) +'GB > '+ r.memCap +'GB)</span>';
+}
+
+function updateBottleneckPanel() {
+    const r = simResult;
+    let h = '<div class="pt">📊 Bottleneck Analysis</div>';
+    // Utilization bars
+    const bars = [
+        {name:'Compute', pct:r.computeUtil, color:'#8b5cf6'},
+        {name:'Memory BW', pct:r.memUtil, color:'#f59e0b'},
+        {name:'Thermal/Power', pct:r.thermalUtil, color:'#ef4444'},
+    ];
+    bars.forEach(b => {
+        const cls = b.pct > 90 ? 'wc' : (b.pct > 70 ? 'ww' : 'wo');
+        h += `<div style="margin-bottom:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:2px;">
+            <span style="color:#a1a1aa;">${b.name}</span>
+            <span style="font-weight:700;color:${b.color};">${b.pct.toFixed(0)}%</span>
+        </div>
+        <div style="height:8px;background:#27272a;border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${Math.min(100,b.pct)}%;background:${b.color};border-radius:4px;transition:width .3s;"></div>
+        </div></div>`;
+    });
+
+    // Recommendations
+    h += '<div style="margin-top:8px;font-size:9px;font-weight:700;color:#71717a;">OPTIMIZATION PRIORITIES</div>';
+    const recs = [];
+    if(r.bottleneck.includes('Memory')) {
+        if(r.prec !== 'fp4' && r.prec !== 'int4') recs.push({pri:'CRITICAL',icon:'✅',text:'Enable lower precision (→FP4/INT4): +2-4× effective BW',impact:'+100-200% throughput'});
+        if(r.memType !== 'hbm4' && r.memType !== 'hbm3e') recs.push({pri:'HIGH',icon:'✅',text:'Upgrade memory (→HBM3e/HBM4)',impact:'+40-100% throughput'});
+        if(r.fusion < 60) recs.push({pri:'MEDIUM',icon:'⚠️',text:'Increase compiler fusion to 60%+',impact:'+20-40% throughput'});
+        recs.push({pri:'LOW',icon:'❌',text:'Adding cores won\'t help (memory-limited)',impact:'Minimal'});
+    } else if(r.bottleneck.includes('Compute')) {
+        recs.push({pri:'CRITICAL',icon:'✅',text:'Increase clock frequency or core count',impact:'+linear throughput'});
+        recs.push({pri:'HIGH',icon:'✅',text:'Upgrade process node for better perf/watt',impact:'+15-30% efficiency'});
+    } else if(r.bottleneck.includes('Network')) {
+        recs.push({pri:'CRITICAL',icon:'✅',text:'Upgrade to NVLink v5 (900 GB/s)',impact:'+3-7× network BW'});
+    }
+    if(r.thermalThrottle) recs.unshift({pri:'CRITICAL',icon:'🔴',text:'Switch to liquid cooling or reduce TDP',impact:'Eliminate throttling'});
+
+    recs.forEach(rec => {
+        const cls = rec.pri === 'CRITICAL' ? 'wc' : (rec.pri === 'HIGH' ? 'ww' : 'wo');
+        h += `<div class="wb ${cls}" style="font-size:9px;padding:5px 8px;">${rec.icon} <b>${rec.pri}:</b> ${rec.text}<br><span style="opacity:0.7;">Impact: ${rec.impact}</span></div>`;
+    });
+
+    $('panel-bottleneck').innerHTML = h;
+}
+
+function updateWarningsPanel() {
+    const r = simResult;
+    let h = '<div class="pt">⚠️ Configuration Warnings</div>';
+    let warnings = [];
+
+    if(r.totalPower > r.tdpLimit) {
+        warnings.push({level:'critical',text:`TDP (${r.totalPower.toFixed(0)}W) exceeds limit (${r.tdpLimit}W) → Throttling to ${r.simFreq} MHz`});
+    }
+    // Die size estimate
+    const dieSize = r.cores * (r.node === '3nm' ? 0.035 : r.node === '5nm' ? 0.05 : 0.08);
+    if(dieSize > 800) warnings.push({level:'warning',text:`Die size ~${dieSize.toFixed(0)}mm² exceeds reticle limit. Consider chiplets.`});
+    if(dieSize > 1000) warnings.push({level:'critical',text:`Die size ~${dieSize.toFixed(0)}mm² too large for single die. Must use chiplet architecture.`});
+    if(!r.fitsInMem) warnings.push({level:'critical',text:`Model (${r.modelMem.toFixed(0)}GB) exceeds memory capacity (${r.memCap}GB). Multi-GPU or quantize.`});
+    if(r.jTemp > 85) warnings.push({level:'warning',text:`Junction temp ${r.jTemp.toFixed(0)}°C approaching limit. Consider better cooling.`});
+    if(r.memUtil < 20 && r.computeUtil > 80) warnings.push({level:'info',text:`Memory bandwidth underutilized. Hardware is well-matched for compute-bound work.`});
+    if(r.prec === 'fp4' && !['4nm','3nm','2nm'].includes(r.node)) warnings.push({level:'warning',text:`FP4/MXFP4 requires Blackwell-class (4nm+) hardware for native support.`});
+    if(r.cool === 'passive' && r.tdpLimit > 30) warnings.push({level:'warning',text:`Passive cooling insufficient for ${r.tdpLimit}W. Max recommended: 25W.`});
+
+    if(warnings.length === 0) {
+        h += '<div class="wb wo">🟢 All parameters within normal ranges.</div>';
+    }
+    warnings.forEach(w => {
+        const cls = w.level === 'critical' ? 'wc' : (w.level === 'warning' ? 'ww' : 'wi');
+        const icon = w.level === 'critical' ? '🔴' : (w.level === 'warning' ? '🟡' : '🟢');
+        h += `<div class="wb ${cls}" style="font-size:9px;padding:5px 8px;">${icon} ${w.text}</div>`;
+    });
+
+    $('panel-warnings').innerHTML = h;
+}
+
+function updateTokenPanel() {
+    const r = simResult;
+    let h = '<div class="pt">🎯 Token Throughput</div>';
+    h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:9px;font-family:'JetBrains Mono',monospace;">`;
+    h += `<div><b style="color:#8b5cf6;">Prefill Phase</b><br>
+    Throughput: <b>${formatNum(r.prefillTokPerSec)}</b> tok/s<br>
+    Utilization: Compute-bound (${r.computeUtil.toFixed(0)}%)</div>`;
+    h += `<div><b style="color:#ec4899;">Decode Phase</b><br>
+    Per-user: <b>${r.decodeTokPerSecPerUser.toFixed(1)}</b> tok/s<br>
+    Batched (×${r.batch}): <b>${formatNum(r.decodeTokPerSec)}</b> tok/s<br>
+    Latency: <b>${(1000/r.decodeTokPerSecPerUser).toFixed(1)}</b> ms/tok</div>`;
+    h += '</div>';
+    const costPer1k = r.tokPerSec > 0 ? (r.totalPower * r.elecRate / 3600000 / r.tokPerSec * 1000).toFixed(6) : '∞';
+    const tokPerHour = r.tokPerSec * 3600;
+    h += `<div style="margin-top:6px;font-size:9px;color:#71717a;font-family:'JetBrains Mono',monospace;">
+    Total Capacity: <b style="color:#f4f4f5;">${formatNum(tokPerHour)}</b> tokens/hour &nbsp;|&nbsp;
+    Cost/1K tokens: <b style="color:#f4f4f5;">$${costPer1k}</b></div>`;
+
+    $('panel-tokens').innerHTML = h;
+}
+
+function updateLatencyPanel() {
+    const r = simResult;
+    let h = '<div class="pt">⏱️ Latency Analysis</div>';
+    const ttft = r.prefillTokPerSec > 0 ? (2048 / r.prefillTokPerSec * 1000) : 9999;
+    const decLat = r.latencyPerTok;
+    const netLat = 45;
+    const totalTTFT = ttft + netLat;
+    const e2e100 = totalTTFT + 100 * (decLat + 5);
+
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.8;">
+    <b style="color:#06b6d4;">Time to First Token (TTFT):</b><br>
+    &nbsp;&nbsp;Prefill: ${ttft.toFixed(0)}ms &nbsp;| Net: ~${netLat}ms &nbsp;| <b>Total: ${totalTTFT.toFixed(0)}ms</b><br>
+    <b style="color:#06b6d4;">Per-Token Decode:</b> ${decLat.toFixed(1)}ms + 5ms net = <b>${(decLat+5).toFixed(1)}ms</b><br>
+    <b style="color:#06b6d4;">End-to-End (100 tokens):</b> <b>${(e2e100/1000).toFixed(2)}s</b><br>
+    <br>`;
+
+    // UX assessment
+    const ttftOk = totalTTFT < 300;
+    const tokOk = (decLat+5) < 50;
+    h += `<b>User Experience:</b><br>
+    ${ttftOk ? '✅' : '⚠️'} TTFT ${totalTTFT.toFixed(0)}ms ${ttftOk ? '(feels instant)' : '(noticeable delay)'}<br>
+    ${tokOk ? '✅' : '⚠️'} Per-token ${(decLat+5).toFixed(0)}ms ${tokOk ? '(smooth streaming)' : '(choppy streaming)'}<br>
+    </div>`;
+
+    $('panel-latency').innerHTML = h;
+}
+
+function updateCODFPanel() {
+    const r = simResult;
+    let h = '<div class="pt">🧭 CODF Optimization Path</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.7;">`;
+
+    // Step 1: Identify constraint
+    h += `<b>Step 1: Dominant Constraint</b><br>`;
+    const constraints = [
+        {name:'Memory BW', pct:r.memUtil},
+        {name:'Compute', pct:r.computeUtil},
+        {name:'Thermal', pct:r.thermalUtil}
+    ].sort((a,b) => b.pct - a.pct);
+    constraints.forEach((c,i) => {
+        h += `&nbsp;&nbsp;${i===0?'→':' '} ${c.name}: ${c.pct.toFixed(0)}% ${i===0?'✓ PRIMARY':''}<br>`;
+    });
+
+    // Step 2: Co-optimization options
+    h += `<br><b>Step 2: Co-Optimize (CODF Principle #3)</b><br>`;
+    if(constraints[0].name === 'Memory BW') {
+        h += `&nbsp;&nbsp;A. ✅ Increase memory BW (+43% with HBM3e→HBM4)<br>`;
+        h += `&nbsp;&nbsp;B. ✅ Reduce precision (${r.prec}→FP4): 2× effective BW<br>`;
+        h += `&nbsp;&nbsp;C. ❌ More cores won't help (memory-limited)<br>`;
+    } else if(constraints[0].name === 'Compute') {
+        h += `&nbsp;&nbsp;A. ✅ Increase frequency/cores<br>`;
+        h += `&nbsp;&nbsp;B. ✅ Upgrade process node<br>`;
+        h += `&nbsp;&nbsp;C. ⚠️ Check thermal headroom first<br>`;
+    } else {
+        h += `&nbsp;&nbsp;A. ✅ Upgrade cooling (liquid)<br>`;
+        h += `&nbsp;&nbsp;B. ✅ Reduce voltage/frequency<br>`;
+    }
+
+    h += `<br><b>Step 3: Validate Thermal</b><br>`;
+    h += `&nbsp;&nbsp;Current: ${r.jTemp.toFixed(0)}°C / Power: ${r.thermalUtil.toFixed(0)}% of TDP<br>`;
+    h += `&nbsp;&nbsp;Status: ${r.thermalThrottle ? '❌ Throttling!' : '✓ Thermal OK'}<br>`;
+
+    h += `</div>`;
+    $('panel-codf').innerHTML = h;
+}
+
+function updateTCOPanel() {
+    const r = simResult;
+    let h = '<div class="pt">💰 Total Cost of Ownership</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.8;">`;
+    h += `<b style="color:#22c55e;">CAPEX</b><br>`;
+    h += `&nbsp;&nbsp;Hardware (${r.gpuCount}× @ $${formatNum(r.hwCost)}): <b>$${formatNum(r.hwCost * r.gpuCount)}</b><br>`;
+    h += `&nbsp;&nbsp;Infrastructure (20%): <b>$${formatNum(r.hwCost * r.gpuCount * 0.2)}</b><br>`;
+    h += `&nbsp;&nbsp;Total CapEx: <b style="color:#f4f4f5;">$${formatNum(r.totalCapex)}</b><br><br>`;
+    h += `<b style="color:#f59e0b;">OPEX (${r.years}yr)</b><br>`;
+    const annPow = r.totalPowerCost / r.years;
+    h += `&nbsp;&nbsp;Power: $${formatNum(annPow)}/yr × ${r.years} = <b>$${formatNum(r.totalPowerCost)}</b><br>`;
+    h += `&nbsp;&nbsp;(${(r.totalPower*r.gpuCount).toFixed(0)}W × PUE ${r.pue} × $${r.elecRate}/kWh)<br>`;
+    h += `&nbsp;&nbsp;Maintenance: <b>$${formatNum(r.maintenanceCost)}</b><br><br>`;
+    h += `<b style="color:#8b5cf6;font-size:11px;">TOTAL TCO: $${formatNum(r.totalTCO)}</b><br>`;
+    const tcoPerTflopsHr = r.attained > 0 ? (r.totalTCO / (r.attained * r.gpuCount * r.years * 8760)).toFixed(4) : '—';
+    h += `&nbsp;&nbsp;$/TFLOPS-hour: $${tcoPerTflopsHr}<br>`;
+    h += `</div>`;
+
+    // Cloud comparison
+    const cloudHourly = 98.32; // p5.48xlarge
+    const cloudTCO = cloudHourly * 8760 * r.years;
+    const savings = cloudTCO - r.totalTCO;
+    const paybackDays = r.totalCapex / (cloudHourly * 24);
+    h += `<div style="margin-top:6px;padding:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:6px;font-size:9px;font-family:'JetBrains Mono',monospace;">
+    <b>vs AWS p5.48xlarge ($${cloudHourly}/hr):</b><br>
+    Cloud ${r.years}yr: $${formatNum(cloudTCO)}<br>
+    <b style="color:#22c55e;">Savings: $${formatNum(savings)} (${((savings/cloudTCO)*100).toFixed(0)}%)</b><br>
+    Payback: ${paybackDays.toFixed(0)} days</div>`;
+
+    $('panel-tco').innerHTML = h;
+}
+
+function updateIcebergPanel() {
+    const r = simResult;
+    let h = '<div class="pt">⚡ Power Iceberg</div>';
+    const chipW = r.totalPower;
+    const serverW = chipW * (1 + r.vrmLoss);
+    const rackW = serverW * (1 + r.psuLoss) * r.gpuCount;
+    const dcW = rackW * r.pue;
+
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.7;">`;
+
+    // Visual iceberg
+    const levels = [
+        {name:'Chip', w:chipW, color:'#8b5cf6', loss:''},
+        {name:'Server', w:serverW, color:'#6366f1', loss:`VRM +${(r.vrmLoss*100).toFixed(0)}%`},
+        {name:'Rack (×${r.gpuCount})', w:rackW/r.gpuCount, color:'#4f46e5', loss:`PSU +${(r.psuLoss*100).toFixed(0)}%`},
+        {name:'Datacenter', w:dcW/r.gpuCount, color:'#4338ca', loss:`PUE ×${r.pue}`},
+    ];
+
+    levels.forEach((l,i) => {
+        const widthPct = 50 + i * 12;
+        h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <div style="width:${widthPct}%;height:20px;background:${l.color};border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;">
+        ${l.name}: ${l.w.toFixed(0)}W</div>
+        <span style="color:#71717a;font-size:8px;">${l.loss}</span></div>`;
+        if(i < levels.length - 1) h += `<div style="text-align:center;font-size:8px;color:#52525b;">↓</div>`;
+    });
+
+    h += `<br><b>Total Multiplier: ${r.chipToGrid.toFixed(2)}×</b><br>`;
+    h += `${chipW.toFixed(0)}W chip → ${(chipW * r.chipToGrid).toFixed(0)}W at grid<br>`;
+    const annualChipCost = chipW * 8760 * r.elecRate / 1000;
+    const annualGridCost = chipW * r.chipToGrid * 8760 * r.elecRate / 1000;
+    h += `Annual: $${annualChipCost.toFixed(0)} chip → <b>$${annualGridCost.toFixed(0)} grid</b> (+${((r.chipToGrid-1)*100).toFixed(0)}% overhead)`;
+    h += `</div>`;
+
+    $('panel-iceberg').innerHTML = h;
+}
+
+function updateBuildBuyPanel() {
+    const r = simResult;
+    let h = '<div class="pt">🏗️ Build vs Buy Analysis</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.8;">`;
+    h += `<b>Custom Silicon NRE:</b> $${formatNum(r.totalNRE)}<br>`;
+    h += `&nbsp;&nbsp;Design: $45M | Tape-out: $20M | Software: $${formatNum(r.swNRE)}<br>`;
+    h += `<b>Unit cost:</b> $${r.unitCost} vs Buy @ $${formatNum(r.hwCost)}<br>`;
+    h += `<b>Break-even:</b> ${formatNum(r.breakEvenUnits)} units<br><br>`;
+
+    const vol = parseInt($('inp-vol').value) || 1;
+    if(vol < 50000) {
+        h += `<div class="wb wo">✅ <b>RECOMMENDATION: BUY</b><br>Volume ${formatNum(vol)} too low for custom silicon NRE to amortize.</div>`;
+    } else if(vol < 500000) {
+        h += `<div class="wb ww">⚠️ <b>EVALUATE CAREFULLY</b><br>Volume ${formatNum(vol)} is borderline. Depends on software ecosystem maturity and differentiation value.</div>`;
+    } else {
+        h += `<div class="wb wi">✅ <b>BUILD</b><br>Volume ${formatNum(vol)} justifies NRE. Per-unit savings: $${formatNum(r.hwCost - r.unitCost)}.</div>`;
+    }
+    h += '</div>';
+    $('panel-buildvbuy').innerHTML = h;
+}
+
+function updateSWCostPanel() {
+    const r = simResult;
+    const engK = parseInt($('inp-engcost').value) || 180;
+    let h = '<div class="pt">💻 Software Maturity & Cost</div>';
+    const levels = [
+        {lvl:1, name:'Basic Drivers', months:6, team:4, adoption:0},
+        {lvl:2, name:'Compiler Backend', months:12, team:6, adoption:5},
+        {lvl:3, name:'ML Frameworks', months:24, team:8, adoption:25},
+        {lvl:4, name:'Production Ecosystem', months:36, team:12, adoption:60},
+        {lvl:5, name:'Mature (NVIDIA-level)', months:120, team:50, adoption:95},
+    ];
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.6;">`;
+    levels.forEach(l => {
+        const cost = l.team * (engK * 1000) * (l.months / 12);
+        h += `<div style="display:flex;gap:6px;align-items:center;margin-bottom:2px;">
+        <div style="width:12px;height:12px;border-radius:2px;background:${l.adoption > 50 ? '#22c55e' : (l.adoption > 10 ? '#f59e0b' : '#ef4444')};flex-shrink:0;"></div>
+        <div style="flex:1;">L${l.lvl}: ${l.name} (${l.months}mo, ${l.team} eng) → $${formatNum(cost)} | ${l.adoption}% adoption</div></div>`;
+    });
+    h += `<br><span style="color:#71717a;">Buy decision (NVIDIA/AMD): $0 software NRE, immediate availability</span>`;
+    h += `</div>`;
+    $('panel-swcost').innerHTML = h;
+}
+
+function updateAgenticPanels() {
+    const r = simResult;
+
+    // Flow panel
+    let h = '<div class="pt">🤖 Agentic AI Workflow</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;">`;
+
+    // Phase timeline bars
+    h += '<div style="margin-bottom:8px;"><b>Query Flow Timeline (${r.agenticTotal.toFixed(1)}s total)</b></div>';
+    r.agenticPhases.forEach(p => {
+        const widthPct = (p.duration / r.agenticTotal) * 100;
+        h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <div style="width:90px;text-align:right;color:#71717a;flex-shrink:0;">${p.name}</div>
+        <div class="phase" style="width:${widthPct}%;background:${p.color};min-width:30px;">${p.duration}s</div>
+        <div style="color:#52525b;font-size:8px;">CPU:${p.cpu}% GPU:${p.gpu}%</div>
+        </div>`;
+    });
+
+    // Resource utilization
+    h += `<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">`;
+    h += `<div class="mc"><span class="ml">GPU Active</span><span class="mv" style="color:#22c55e;">${r.gpuUtilAgentic.toFixed(0)}%</span></div>`;
+    h += `<div class="mc"><span class="ml">GPU Idle</span><span class="mv" style="color:#ef4444;">${(100-r.gpuUtilAgentic).toFixed(0)}%</span></div>`;
+    h += `<div class="mc"><span class="ml">Queries/hr</span><span class="mv" style="color:#f59e0b;">${r.agenticQueriesPerHr.toFixed(0)}</span></div>`;
+    h += `</div>`;
+
+    // Key insight
+    h += `<div class="wb ww" style="margin-top:8px;">
+    <b>⚡ KEY INSIGHT:</b> GPU idle ${(100-r.gpuUtilAgentic).toFixed(0)}% of the time!<br>
+    Agentic workloads invert the CPU:GPU ratio → need 4× more CPU, less GPU density.<br>
+    Architecture: 4 CPU : 1 GPU (vs 1:8 traditional)
+    </div>`;
+
+    h += `</div>`;
+    $('panel-agentic-flow').innerHTML = h;
+
+    // Economics comparison
+    h = '<div class="pt">📊 Agentic vs Traditional Economics</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;">`;
+    h += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;text-align:center;">`;
+    h += `<div style="color:#71717a;"></div><div style="color:#8b5cf6;font-weight:700;">Traditional</div><div style="color:#f59e0b;font-weight:700;">Agentic</div>`;
+    const rows = [
+        ['Queries/GPU/hr', r.tradQueriesPerHr.toFixed(0), r.agenticQueriesPerHr.toFixed(0)],
+        ['GPU Utilization', '90%', r.gpuUtilAgentic.toFixed(0)+'%'],
+        ['CPU Utilization', '8%', '79%'],
+        ['Latency/query', r.tradLatency+'s', r.agenticTotal.toFixed(1)+'s'],
+        ['Cost/query', '$'+(r.totalPower*r.elecRate/3600/1000/r.tradQueriesPerHr*3600).toFixed(5), '$'+(r.totalPower*r.elecRate/3600/1000/r.agenticQueriesPerHr*3600).toFixed(5)],
+    ];
+    rows.forEach(row => {
+        h += `<div style="text-align:left;color:#a1a1aa;padding:2px 0;">${row[0]}</div>`;
+        h += `<div style="padding:2px 0;">${row[1]}</div>`;
+        h += `<div style="padding:2px 0;">${row[2]}</div>`;
+    });
+    h += `</div>`;
+    h += `<div class="wb wi" style="margin-top:8px;"><b>But agentic enables:</b> ✓ Multi-step reasoning ✓ Tool use ✓ Planning ✓ Error recovery<br>
+    ROI: 4× cost per query, but 10× more capable → depends on task value.</div>`;
+    h += '</div>';
+    $('panel-agentic-econ').innerHTML = h;
+
+    // Agentic compare panel
+    h = '<div class="pt">🔀 Resource Utilization Timeline</div>';
+    h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;line-height:1.4;">`;
+    // ASCII-style timeline
+    const timeSlots = 20;
+    const cpuBar = [], gpuBar = [], netBar = [];
+    for(let i = 0; i < timeSlots; i++) {
+        const t = (i / timeSlots) * r.agenticTotal;
+        let phase = r.agenticPhases[0];
+        let accum = 0;
+        for(const p of r.agenticPhases) {
+            if(t >= accum && t < accum + p.duration) { phase = p; break; }
+            accum += p.duration;
+        }
+        cpuBar.push(phase.cpu > 50 ? '█' : (phase.cpu > 20 ? '▓' : '░'));
+        gpuBar.push(phase.gpu > 50 ? '█' : (phase.gpu > 20 ? '▓' : '░'));
+        netBar.push(phase.net > 50 ? '█' : (phase.net > 20 ? '▓' : '░'));
+    }
+    h += `<span style="color:#3b82f6;">CPU:</span> [${cpuBar.join('')}] Active ${((r.agenticTotal - 1.5)/r.agenticTotal*100).toFixed(0)}%<br>`;
+    h += `<span style="color:#22c55e;">GPU:</span> [${gpuBar.join('')}] Active ${r.gpuUtilAgentic.toFixed(0)}%<br>`;
+    h += `<span style="color:#f59e0b;">NET:</span> [${netBar.join('')}]<br>`;
+    h += `<span style="color:#52525b;">█=Active ▓=Light ░=Idle &nbsp;&nbsp;Total: ${r.agenticTotal.toFixed(1)}s</span>`;
+    h += '</div>';
+    $('panel-agentic-compare').innerHTML = h;
+}
+
+function updateInsights() {
+    const r = simResult;
+    let desc = '';
+    if(r.thermalThrottle || r.powerThrottle) {
+        desc += `<span style="color:#ef4444;font-weight:700;">⚠️ ${r.thermalThrottle?'THERMAL':'POWER'} THROTTLE:</span> Clock ${r.freq}→${r.simFreq} MHz. `;
+        if(r.cool === 'air') desc += 'Try liquid cooling. ';
+        if(r.pkg === '3d') desc += '3D stacking traps heat (1.9× thermal resistance). ';
+    } else {
+        desc += '<span style="color:#22c55e;font-weight:700;">✓ STABLE</span> ';
+    }
+    if(r.bottleneck.includes('Memory')) {
+        desc += `| Memory BW bottleneck (${r.memUtil.toFixed(0)}% saturated). `;
+        if(r.prec !== 'fp4' && r.prec !== 'int4') desc += '💡 Try lower precision. ';
+    } else if(r.bottleneck.includes('Compute')) {
+        desc += `| Compute-bound (${r.computeUtil.toFixed(0)}% utilized). Good hardware utilization! `;
+    }
+    desc += `| Intensity: ${r.baseIntensity.toFixed(2)} → ${r.effectiveIntensity.toFixed(2)} (with ${r.fusion}% fusion)`;
+    $('insight-box').innerHTML = desc;
+}
+
+// ============================================
+// COMPARISON MODE
+// ============================================
+function addToComparison() {
+    if(comparisonSlots.length >= 3) {
+        comparisonSlots.shift(); // remove oldest
+    }
+    const presetName = val('sel-preset') || 'Custom';
+    const hwName = HW_DB[presetName] ? HW_DB[presetName].name : 'Custom Config';
+    comparisonSlots.push({...simResult, label: hwName + ' #' + (comparisonSlots.length+1)});
+    showTab('compare');
+    renderComparison();
+}
+
+function renderComparison() {
+    if(comparisonSlots.length === 0) {
+        $('panel-compare').innerHTML = '<div class="pt">⚖️ Comparison</div><p style="font-size:10px;color:#52525b;">Click "Compare" to add configs (max 3).</p>';
+        return;
+    }
+    let h = '<div class="pt">⚖️ Side-by-Side Comparison <button onclick="comparisonSlots=[];renderComparison();" style="margin-left:auto;font-size:8px;color:#ef4444;cursor:pointer;background:none;border:none;">Clear All</button></div>';
+    h += `<div style="overflow-x:auto;"><table style="width:100%;font-size:9px;font-family:'JetBrains Mono',monospace;border-collapse:collapse;">`;
+
+    // Header
+    h += '<tr style="border-bottom:1px solid #27272a;">';
+    h += '<td style="padding:4px;color:#71717a;min-width:120px;"></td>';
+    comparisonSlots.forEach(s => {
+        h += `<td style="padding:4px;font-weight:700;color:#8b5cf6;text-align:center;">${s.label}</td>`;
+    });
+    h += '</tr>';
+
+    // Rows
+    const fields = [
+        {name:'Node', fn:s=>s.node},
+        {name:'TDP', fn:s=>s.tdpLimit+'W'},
+        {name:'Memory', fn:s=>s.memCap+'GB '+s.memType},
+        {name:'Peak TFLOPS', fn:s=>s.finalTFLOPS.toFixed(0), best:'max'},
+        {name:'Attained TFLOPS', fn:s=>s.attained.toFixed(0), best:'max'},
+        {name:'Tokens/s', fn:s=>formatNum(s.tokPerSec), best:'max', numFn:s=>s.tokPerSec},
+        {name:'Latency/tok', fn:s=>s.latencyPerTok.toFixed(1)+'ms', best:'min', numFn:s=>s.latencyPerTok},
+        {name:'Power', fn:s=>s.totalPower.toFixed(0)+'W', best:'min', numFn:s=>s.totalPower},
+        {name:'Temp', fn:s=>s.jTemp.toFixed(0)+'°C', best:'min', numFn:s=>s.jTemp},
+        {name:'TCO ('+comparisonSlots[0].years+'yr)', fn:s=>'$'+formatNum(s.totalTCO), best:'min', numFn:s=>s.totalTCO},
+        {name:'Bottleneck', fn:s=>s.bottleneck},
+    ];
+
+    fields.forEach(f => {
+        h += '<tr style="border-bottom:1px solid #1a1a1a;">';
+        h += `<td style="padding:3px 4px;color:#71717a;">${f.name}</td>`;
+        let bestIdx = -1;
+        if(f.best && f.numFn) {
+            const vals = comparisonSlots.map(s => f.numFn(s));
+            bestIdx = f.best === 'max' ? vals.indexOf(Math.max(...vals)) : vals.indexOf(Math.min(...vals));
+        }
+        comparisonSlots.forEach((s,i) => {
+            const isBest = i === bestIdx;
+            h += `<td style="padding:3px 4px;text-align:center;${isBest?'color:#22c55e;font-weight:700;':''}">${f.fn(s)} ${isBest?'✓':''}</td>`;
+        });
+        h += '</tr>';
+    });
+
+    h += '</table></div>';
+    $('panel-compare').innerHTML = h;
+}
+
+// ============================================
+// CANVAS: ROOFLINE
+// ============================================
+function drawRoofline() {
+    const cv = $('cvRoofline');
+    const c = cv.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.parentNode.getBoundingClientRect();
+    cv.width = rect.width * dpr;
+    cv.height = rect.height * dpr;
+    cv.style.width = rect.width + 'px';
+    cv.style.height = rect.height + 'px';
+    c.scale(dpr, dpr);
+    const w = rect.width, h = rect.height;
+    c.clearRect(0,0,w,h);
+
+    const r = simResult;
+    const pad = {l:50, r:15, t:25, b:35};
+    const cw = w - pad.l - pad.r;
+    const ch = h - pad.t - pad.b;
+
+    // Log scale X: 0.01 to 1000
+    const minLX = -2, maxLX = 3;
+    const maxY = Math.max(500, r.computeCeil * 1.3, r.rawPeakTFLOPS * 1.2);
+    const toX = v => pad.l + ((Math.log10(v) - minLX) / (maxLX - minLX)) * cw;
+    const toY = v => pad.t + ch - (v / maxY) * ch;
+
+    // Grid
+    c.strokeStyle = '#1e1b4b';
+    c.lineWidth = 0.5;
+    [0.01,0.1,1,10,100,1000].forEach(x => {
+        c.beginPath(); c.moveTo(toX(x), pad.t); c.lineTo(toX(x), h-pad.b); c.stroke();
+        c.fillStyle = '#52525b'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+        c.fillText(x>=1?x.toFixed(0):x<0.1?x.toFixed(2):x.toFixed(1), toX(x), h-pad.b+12);
+    });
+    for(let y = 0; y <= maxY; y += Math.max(100, Math.pow(10, Math.floor(Math.log10(maxY/5))))) {
+        if(y === 0) continue;
+        c.beginPath(); c.moveTo(pad.l, toY(y)); c.lineTo(w-pad.r, toY(y)); c.stroke();
+        c.fillStyle = '#52525b'; c.font = '8px JetBrains Mono'; c.textAlign = 'right';
+        c.fillText(y >= 1000 ? (y/1000).toFixed(0)+'K' : y.toFixed(0), pad.l-4, toY(y)+3);
+    }
+
+    // Background regions
+    const steps = 80;
+    for(let i = 0; i < steps; i++) {
+        const lx = minLX + (i/steps)*(maxLX-minLX);
+        const nlx = minLX + ((i+1)/steps)*(maxLX-minLX);
+        const xv = Math.pow(10, lx);
+        const memB = xv * r.effectiveMemBWTBS;
+        const netB = r.commWeight > 0 ? (xv * (r.linkBW/1000)) / r.commWeight : Infinity;
+        const lim = Math.min(r.computeCeil, memB, netB);
+        c.fillStyle = lim === r.computeCeil ? 'rgba(139,92,246,.04)' : (lim === memB ? 'rgba(245,158,11,.04)' : 'rgba(20,184,166,.04)');
+        c.fillRect(toX(Math.pow(10,lx)), pad.t, toX(Math.pow(10,nlx))-toX(Math.pow(10,lx)), ch);
+    }
+
+    // Memory BW line
+    c.strokeStyle = 'rgba(245,158,11,.5)'; c.lineWidth = 1.5; c.setLineDash([4,4]);
+    c.beginPath();
+    c.moveTo(toX(0.01), toY(0.01 * r.effectiveMemBWTBS));
+    c.lineTo(toX(1000), toY(Math.min(1000 * r.effectiveMemBWTBS, maxY)));
+    c.stroke();
+
+    // Network line
+    if(r.commWeight > 0) {
+        c.strokeStyle = 'rgba(20,184,166,.5)';
+        c.beginPath();
+        c.moveTo(toX(0.01), toY((0.01 * r.linkBW/1000) / r.commWeight));
+        c.lineTo(toX(1000), toY(Math.min((1000 * r.linkBW/1000) / r.commWeight, maxY)));
+        c.stroke();
+    }
+    c.setLineDash([]);
+
+    // Envelope
+    c.strokeStyle = '#e4e4e7'; c.lineWidth = 2.5;
+    c.beginPath();
+    for(let i = 0; i <= steps; i++) {
+        const lx = minLX + (i/steps)*(maxLX-minLX);
+        const xv = Math.pow(10, lx);
+        const memL = xv * r.effectiveMemBWTBS;
+        const netL = r.commWeight > 0 ? (xv * r.linkBW/1000) / r.commWeight : Infinity;
+        const lim = Math.min(r.computeCeil, memL, netL);
+        if(i===0) c.moveTo(toX(xv), toY(lim)); else c.lineTo(toX(xv), toY(lim));
+    }
+    c.stroke();
+
+    // Throttled peak
+    if(r.thermalThrottle || r.powerThrottle) {
+        c.strokeStyle = 'rgba(239,68,68,.4)'; c.setLineDash([3,3]); c.lineWidth = 1;
+        c.beginPath(); c.moveTo(pad.l, toY(r.rawPeakTFLOPS)); c.lineTo(w-pad.r, toY(r.rawPeakTFLOPS)); c.stroke();
+        c.setLineDash([]);
+    }
+
+    // Axes
+    c.strokeStyle = '#52525b'; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, h-pad.b); c.lineTo(w-pad.r, h-pad.b); c.stroke();
+
+    // Labels
+    c.fillStyle = '#a1a1aa'; c.font = '500 9px Space Grotesk'; c.textAlign = 'center';
+    c.fillText('Arithmetic Intensity (FLOPs/Byte)', w/2, h-4);
+    c.save(); c.translate(12, h/2); c.rotate(-Math.PI/2);
+    c.fillText('Performance (TFLOPS)', 0, 0);
+    c.restore();
+
+    // Operating point
+    const dx = toX(r.effectiveIntensity);
+    const dy = toY(r.attained);
+
+    // Crosshairs
+    c.strokeStyle = 'rgba(244,244,245,.15)'; c.lineWidth = 1; c.setLineDash([3,3]);
+    c.beginPath(); c.moveTo(dx, h-pad.b); c.lineTo(dx, dy); c.moveTo(pad.l, dy); c.lineTo(dx, dy); c.stroke();
+    c.setLineDash([]);
+
+    // Dot
+    c.fillStyle = '#fff'; c.strokeStyle = '#8b5cf6'; c.lineWidth = 3;
+    c.beginPath(); c.arc(dx, dy, 7, 0, Math.PI*2); c.fill(); c.stroke();
+    c.strokeStyle = 'rgba(139,92,246,.3)'; c.lineWidth = 1;
+    c.beginPath(); c.arc(dx, dy, 11, 0, Math.PI*2); c.stroke();
+
+    // Legend
+    c.font = '8px JetBrains Mono';
+    const lg = [{c:'rgba(139,92,246,.6)',t:'Compute'},{c:'rgba(245,158,11,.6)',t:'Memory'},{c:'rgba(20,184,166,.6)',t:'Network'}];
+    lg.forEach((l,i) => {
+        const lx = w - pad.r - 80, ly = pad.t + 10 + i*14;
+        c.fillStyle = l.c; c.fillRect(lx, ly, 10, 10);
+        c.fillStyle = '#a1a1aa'; c.textAlign = 'left'; c.fillText(l.t, lx+14, ly+8);
+    });
+}
+
+// ============================================
+// CANVAS: SILICON DIAGRAM
+// ============================================
+function drawSilicon() {
+    const cv = $('cvSilicon');
+    const c = cv.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.parentNode.getBoundingClientRect();
+    cv.width = rect.width * dpr;
+    cv.height = rect.height * dpr;
+    cv.style.width = rect.width + 'px';
+    cv.style.height = rect.height + 'px';
+    c.scale(dpr, dpr);
+    const w = rect.width, h = rect.height;
+    c.clearRect(0,0,w,h);
+
+    const r = simResult;
+    const normT = Math.min(Math.max((r.jTemp - 25) / 65, 0), 1);
+    const heatR = Math.floor(80 + normT * 175);
+    const heatG = Math.floor(110 - normT * 90);
+    const heatB = Math.floor(220 - normT * 200);
+    const heatColor = `rgb(${heatR},${heatG},${heatB})`;
+
+    // Package substrate
+    c.fillStyle = '#18181b'; c.strokeStyle = '#27272a'; c.lineWidth = 2;
+    c.beginPath(); c.roundRect(w*.08, h*.2, w*.84, h*.6, 10); c.fill(); c.stroke();
+
+    // Packaging layout
+    if(r.pkg === 'monolithic') {
+        c.fillStyle = heatColor;
+        c.beginPath(); c.roundRect(w*.3, h*.38, w*.4, h*.24, 6); c.fill();
+        c.strokeStyle = r.thermalThrottle ? '#ef4444' : '#3f3f46'; c.lineWidth = 2; c.stroke();
+        c.fillStyle = '#fff'; c.font = '9px JetBrains Mono'; c.textAlign = 'center';
+        c.fillText('Monolithic Die', w*.5, h*.5);
+        c.fillText(r.cores + ' cores', w*.5, h*.56);
+    } else if(r.pkg === '2.5d') {
+        // Interposer
+        c.fillStyle = '#27272a'; c.fillRect(w*.15, h*.5, w*.7, h*.12);
+        // Chiplets
+        c.fillStyle = heatColor;
+        c.fillRect(w*.18, h*.36, w*.18, h*.14);
+        c.fillRect(w*.38, h*.36, w*.18, h*.14);
+        c.fillStyle = '#8b5cf6'; c.fillRect(w*.58, h*.36, w*.24, h*.14);
+        c.fillStyle = '#fff'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+        c.fillText('Core 0', w*.27, h*.43);
+        c.fillText('Core 1', w*.47, h*.43);
+        c.fillText('HBM', w*.7, h*.43);
+        c.fillText(r.memCap+'GB', w*.7, h*.48);
+    } else {
+        // 3D stack
+        c.fillStyle = '#1e1b4b'; c.fillRect(w*.3, h*.48, w*.4, h*.1);
+        c.fillStyle = heatColor; c.fillRect(w*.3, h*.36, w*.4, h*.1);
+        c.strokeStyle = '#a78bfa'; c.lineWidth = 1;
+        for(let x = w*.33; x < w*.67; x += 10) {
+            c.beginPath(); c.moveTo(x, h*.46); c.lineTo(x, h*.48); c.stroke();
+        }
+        c.fillStyle = '#fff'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+        c.fillText('Logic (hot)', w*.5, h*.42);
+        c.fillText('Base/Memory', w*.5, h*.54);
+    }
+
+    // Cooling
+    if(r.cool === 'liquid') {
+        c.fillStyle = 'rgba(14,116,144,.15)'; c.fillRect(w*.2, h*.18, w*.6, h*.1);
+        c.strokeStyle = '#06b6d4'; c.strokeRect(w*.2, h*.18, w*.6, h*.1);
+        c.strokeStyle = '#0891b2'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(w*.15, h*.23); c.lineTo(w*.85, h*.23); c.stroke();
+        c.fillStyle = '#06b6d4'; c.font = '8px Space Grotesk'; c.textAlign = 'center';
+        c.fillText('Liquid Coldplate', w*.5, h*.15);
+    } else if(r.cool === 'air') {
+        c.strokeStyle = '#3f3f46'; c.lineWidth = 1;
+        for(let x = w*.2; x < w*.8; x += 7) {
+            c.beginPath(); c.moveTo(x, h*.16); c.lineTo(x, h*.28); c.stroke();
+        }
+        c.fillStyle = '#52525b'; c.font = '8px Space Grotesk'; c.textAlign = 'center';
+        c.fillText('Air Heatsink', w*.5, h*.13);
+    } else {
+        c.fillStyle = '#52525b'; c.font = '8px Space Grotesk'; c.textAlign = 'center';
+        c.fillText('Passive (no active cooling)', w*.5, h*.15);
+    }
+
+    // Info text
+    c.fillStyle = '#71717a'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+    c.fillText(`${r.node} | ${r.pkg} | ${r.jTemp.toFixed(0)}°C | ${r.totalPower.toFixed(0)}W`, w*.5, h*.88);
+
+    // Throttle indicator
+    if(r.thermalThrottle) {
+        c.fillStyle = 'rgba(239,68,68,.15)'; c.fillRect(0,0,w,h);
+        c.fillStyle = '#ef4444'; c.font = 'bold 12px Space Grotesk'; c.textAlign = 'center';
+        c.fillText('⚠️ THERMAL THROTTLE', w*.5, h*.96);
+    }
+}
+
+// ============================================
+// CANVAS RESIZE
+// ============================================
+function resizeCanvases() {
+    drawRoofline();
+    drawSilicon();
+}
+window.addEventListener('resize', () => { if($('view-perf').style.display !== 'none') resizeCanvases(); });
+
+// ============================================
+// EXPORT & SCREENSHOT
+// ============================================
+function exportConfig() {
+    const blob = new Blob([JSON.stringify(simResult, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'stco-config-v2.json';
+    a.click();
+}
+
+function captureScreenshot() {
+    html2canvas(document.body, {backgroundColor:'#09090b', scale:2}).then(cv => {
+        const a = document.createElement('a');
+        a.download = 'stco-simulator-v2.png';
+        a.href = cv.toDataURL();
+        a.click();
+    });
+}
+
+// ============================================
+// HELPERS
+// ============================================
+function formatNum(n) {
+    if(n === undefined || n === null || isNaN(n)) return '—';
+    if(Math.abs(n) >= 1e9) return (n/1e9).toFixed(1) + 'B';
+    if(Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
+    if(Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
+    return n.toFixed(0);
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Pre-run simulation so values are ready when user dismisses overlay
+    setTimeout(() => { try { runSim(); } catch(e) { console.error(e); } }, 300);
+});
+
+</script>
+</body></html>
