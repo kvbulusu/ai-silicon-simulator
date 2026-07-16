@@ -2060,8 +2060,8 @@ def calculate():
     print(f"Peak TFLOPS:     {peak:.1f}")
     print(f"Attained TFLOPS: {attained:.1f}")
     print(f"Bottleneck:      {bottleneck}")
-    print(f"Total TCO:       ${tco:,.0f}")
-    print(f"$/TFLOPS-hour:   ${tco/(attained*gpu_count*years*8760):.4f}")
+    print("Total TCO:       $" + f"{tco:,.0f}")
+    print("$/TFLOPS-hour:   $" + f"{tco/(attained*gpu_count*years*8760):.4f}")
     print("=" * 50)
 
 if __name__ == "__main__":
