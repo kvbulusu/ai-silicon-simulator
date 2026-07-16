@@ -7,28 +7,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Space Grotesk','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
 
 <style>
-:root{--primary:#8b5cf6;--bg:#09090b;--sf:#18181b;--bd:#27272a;}
+
+/* Dark/Light Mode Variables */
+:root, [data-theme="dark"] {
+    --primary:#8b5cf6;--bg:#09090b;--sf:#18181b;--bd:#27272a;
+    --text-primary:#f4f4f5;--text-secondary:#a1a1aa;--text-muted:#71717a;--text-dim:#52525b;
+    --input-bg:#27272a;--input-border:#3f3f46;
+    --hover-bg:#27272a;
+    --canvas-bg:#09090b;
+    --overlay-bg:rgba(9,9,11,.97);
+}
+[data-theme="light"] {
+    --primary:#7c3aed;--bg:#f8fafc;--sf:#ffffff;--bd:#e2e8f0;
+    --text-primary:#1e293b;--text-secondary:#475569;--text-muted:#64748b;--text-dim:#94a3b8;
+    --input-bg:#f1f5f9;--input-border:#cbd5e1;
+    --hover-bg:#e2e8f0;
+    --canvas-bg:#f1f5f9;
+    --overlay-bg:rgba(248,250,252,.97);
+}
+
 *{box-sizing:border-box;}
-body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:#f4f4f5;margin:0;overflow-x:hidden;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text-primary);margin:0;overflow-x:hidden;transition:background-color .3s,color .3s;}
 input[type="range"]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;width:100%;}
 input[type="range"]::-webkit-slider-runnable-track{background:#27272a;height:5px;border-radius:3px;}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;margin-top:-5px;background:#8b5cf6;height:15px;width:15px;border-radius:50%;border:2px solid #f4f4f5;}
 .scr::-webkit-scrollbar{width:4px;}
 .scr::-webkit-scrollbar-track{background:var(--bg);}
 .scr::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:3px;}
-select,input[type="number"]{background:#27272a;border:1px solid #3f3f46;border-radius:5px;color:#f4f4f5;padding:4px 6px;font-size:11px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;}
+select,input[type="number"]{background:var(--input-bg);border:1px solid var(--input-border);border-radius:5px;color:var(--text-primary);padding:4px 6px;font-size:11px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;}
 select:focus{border-color:#8b5cf6;}
 .tb{padding:5px 10px;font-size:9px;font-weight:700;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid transparent;text-transform:uppercase;letter-spacing:.5px;font-family:'JetBrains Mono',monospace;white-space:nowrap;}
 .tb.ac{background:#8b5cf6;color:#fff;border-color:#8b5cf6;}
-.tb:not(.ac){background:var(--sf);color:#a1a1aa;border-color:var(--bd);}
-.tb:not(.ac):hover{background:#27272a;color:#f4f4f5;}
+.tb:not(.ac){background:var(--sf);color:var(--text-secondary);border-color:var(--bd);}
+.tb:not(.ac):hover{background:var(--hover-bg);color:var(--text-primary);}
 .pn{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;}
 .pt{font-size:10px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-.mc{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:2px;}
+.mc{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:2px;transition:background-color .3s;}
 .ml{font-size:8px;text-transform:uppercase;font-weight:700;letter-spacing:.5px;color:#52525b;font-family:'JetBrains Mono',monospace;}
 .mv{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;}
 .wb{border-radius:6px;padding:8px;font-size:10px;font-family:'JetBrains Mono',monospace;line-height:1.6;margin-bottom:4px;}
@@ -43,8 +62,87 @@ select:focus{border-color:#8b5cf6;}
 .ap{animation:pulse 1.5s infinite;}
 @keyframes flowDot{0%{left:0;opacity:0}20%{opacity:1}80%{opacity:1}100%{left:100%;opacity:0}}
 .fd{position:absolute;width:6px;height:6px;border-radius:50%;animation:flowDot 2s linear infinite;}
-#welcome-overlay{position:fixed;inset:0;background:rgba(9,9,11,.97);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+#welcome-overlay{position:fixed;inset:0;background:var(--overlay-bg);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 canvas{display:block;}
+
+/* Tooltip System */
+.tooltip-wrap{position:relative;display:inline-block;}
+.tooltip-trigger{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:var(--primary);color:#fff;border-radius:50%;font-size:9px;font-weight:700;cursor:help;margin-left:4px;vertical-align:middle;line-height:1;}
+.tooltip-content{display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 6px);background:#1e293b;color:#e2e8f0;padding:8px 10px;border-radius:6px;width:260px;z-index:1000;font-size:10px;line-height:1.5;font-family:'Space Grotesk',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none;}
+.tooltip-content::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;}
+.tooltip-wrap:hover .tooltip-content{display:block;}
+
+/* Lab Exercises */
+.lab-exercise{margin:16px 0;padding:14px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;}
+.lab-exercise h3{font-size:13px;margin:0 0 10px;color:var(--primary);}
+.exercise-card{background:var(--bg);padding:14px;margin:10px 0;border-left:3px solid var(--primary);border-radius:4px;font-size:10px;line-height:1.7;font-family:'JetBrains Mono',monospace;color:var(--text-secondary);}
+.exercise-card h4{color:var(--primary);margin:0 0 6px;font-size:11px;font-family:'Space Grotesk',sans-serif;}
+.exercise-card p{margin:4px 0;}
+.exercise-card ol,.exercise-card ul{margin:4px 0 4px 16px;padding:0;}
+.action-btn{background:#22c55e;color:#fff;padding:6px 14px;border:none;border-radius:4px;cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;margin:4px 4px 4px 0;}
+.action-btn:hover{background:#16a34a;}
+.reveal-btn{background:#eab308;color:#000;padding:6px 14px;border:none;border-radius:4px;cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;margin:4px 4px 4px 0;}
+.reveal-btn:hover{background:#facc15;}
+.solution{margin-top:10px;padding:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-left:3px solid #22c55e;border-radius:4px;}
+.solution h5{color:#22c55e;margin:0 0 6px;font-size:10px;}
+.solution-table{width:100%;border-collapse:collapse;margin:6px 0;font-size:9px;}
+.solution-table th,.solution-table td{padding:6px 8px;border:1px solid var(--bd);text-align:left;}
+.solution-table th{background:var(--primary);color:#fff;}
+
+/* Book Attribution Banner */
+.book-banner{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:10px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.book-banner .banner-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.book-banner .banner-left{text-align:left;}
+.book-banner .banner-left h1{margin:0;font-size:20px;font-weight:700;}
+.book-banner .banner-left h2{margin:2px 0;font-size:13px;font-weight:500;opacity:.95;}
+.book-banner .banner-left p{margin:0;font-size:10px;opacity:.8;}
+.book-banner .banner-right{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.cta-btn{display:inline-block;background:#ff6b6b;color:#fff;padding:8px 18px;border-radius:6px;text-decoration:none;font-weight:700;font-size:12px;transition:transform .2s;border:none;cursor:pointer;}
+.cta-btn:hover{transform:scale(1.05);}
+.gh-btn{display:inline-block;background:#24292e;color:#fff;padding:8px 18px;border-radius:6px;text-decoration:none;font-weight:700;font-size:12px;border:none;cursor:pointer;}
+.gh-btn:hover{background:#333;}
+
+/* Social & Feedback */
+.share-section{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+.share-btn{padding:4px 10px;border:1px solid var(--bd);border-radius:4px;background:var(--sf);color:var(--text-secondary);font-size:9px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+.share-btn:hover{border-color:var(--primary);color:var(--primary);}
+.feedback-link{display:inline-block;padding:4px 10px;font-size:9px;color:var(--text-secondary);text-decoration:none;border:1px solid var(--bd);border-radius:4px;margin:2px;}
+.feedback-link:hover{border-color:var(--primary);color:var(--primary);}
+
+/* Export Section */
+.export-section{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.export-btn{padding:5px 12px;border:1px solid var(--bd);border-radius:4px;background:var(--sf);color:var(--text-secondary);font-size:9px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+.export-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* Break-even chart */
+#breakEvenChartContainer{margin-top:8px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px;max-height:280px;}
+
+/* Theme Toggle */
+.theme-toggle{background:none;border:1px solid var(--bd);border-radius:4px;padding:3px 8px;color:var(--text-secondary);cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;}
+.theme-toggle:hover{border-color:var(--primary);color:var(--primary);}
+
+/* Mobile Responsiveness */
+@media (max-width:900px){
+    #main-grid{grid-template-columns:1fr !important;}
+    #sidebar{max-height:40vh;border-bottom:1px solid var(--bd);}
+    .book-banner .banner-inner{flex-direction:column;text-align:center;}
+    .book-banner .banner-left{text-align:center;}
+}
+@media (max-width:768px){
+    .tab-buttons-row{flex-wrap:wrap !important;}
+    .tab-buttons-row .tb{flex:1 1 45%;min-width:100px;}
+    .exercise-card{padding:10px;}
+    .action-btn,.reveal-btn{width:100%;margin:3px 0;}
+    #metrics-row{grid-template-columns:repeat(3,1fr) !important;}
+    #view-perf{grid-template-columns:1fr !important;}
+    .banner-right{justify-content:center;}
+}
+@media (pointer:coarse){
+    input[type="range"]{height:36px;}
+    button{min-height:40px;}
+    select{min-height:40px;font-size:14px !important;}
+}
+
 </style>
 </head>
 <body>
@@ -76,6 +174,21 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 
 
+
+<!-- Book Attribution Banner -->
+<div class="book-banner" id="book-banner">
+<div class="banner-inner">
+<div class="banner-left">
+<h1>🔬 STCO Simulator v2</h1>
+<h2>📚 Interactive companion for "Bridging AI and Silicon" by Kiran Bulusu</h2>
+<p>Chapters 8–16 brought to life</p>
+</div>
+<div class="banner-right">
+<a href="https://github.com/kvbulusu/ai-silicon-simulator" class="gh-btn" target="_blank">⭐ Star on GitHub</a>
+</div>
+</div>
+</div>
+
 <div id="app" style="display:flex;flex-direction:column;height:100vh;padding:6px 8px;">
 
 <!-- HEADER -->
@@ -89,8 +202,9 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
 <button onclick="addToComparison()" class="tb" id="btn-add-cmp" title="Add to comparison">⚖️ Compare</button>
-<button onclick="exportConfig()" class="tb" title="Export JSON">📥 Export</button>
+<button onclick="exportJSON()" class="tb" title="Export JSON">📥 Export</button>
 <button onclick="captureScreenshot()" class="tb" title="Screenshot">📷</button>
+<button onclick="toggleDarkMode()" class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙 Theme</button>
 <div class="mc" style="padding:3px 8px;flex-direction:row;gap:6px;font-size:9px;">
 <span style="color:#52525b;">⚡</span><span id="hdr-bn" style="font-weight:700;color:#8b5cf6;font-size:9px;">—</span>
 </div>
@@ -101,7 +215,7 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </header>
 
 <!-- MAIN GRID -->
-<div style="display:grid;grid-template-columns:340px 1fr;gap:6px;flex-grow:1;min-height:0;overflow:hidden;">
+<div id="main-grid" style="display:grid;grid-template-columns:340px 1fr;gap:6px;flex-grow:1;min-height:0;overflow:hidden;">
 
 <!-- LEFT SIDEBAR -->
 <div id="sidebar" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;padding-right:3px;" class="scr">
@@ -215,17 +329,17 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 <!-- Sliders -->
 <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
-<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Clock (MHz)</span><span id="lbl-freq" style="color:#8b5cf6;font-weight:700;">1400</span></div>
-<input type="range" id="sld-freq" min="200" max="2500" step="50" value="1400" oninput="runSim()"></div>
-<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>TDP (W)</span><span id="lbl-tdp" style="color:#ef4444;font-weight:700;">700</span></div>
-<input type="range" id="sld-tdp" min="2" max="1200" step="5" value="700" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Clock (MHz) <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Core clock frequency. Power scales with V²f (cubic), performance scales linearly. Lowering clock saves power but reduces efficiency per watt. (Ch. 8 DVFS)</span></span></span><span id="lbl-freq" style="color:#8b5cf6;font-weight:700;">1400</span></div>
+<input type="range" id="sld-freq" min="200" max="2500" step="30" value="1400" oninput="runSim()"></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>TDP (W) <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Thermal Design Power: max sustained power the chip can dissipate. Real-world power varies with workload. Exceeding TDP causes thermal throttling. (Ch. 8)</span></span></span><span id="lbl-tdp" style="color:#ef4444;font-weight:700;">700</span></div>
+<input type="range" id="sld-tdp" min="50" max="2000" step="10" value="700" oninput="runSim()"></div>
 <div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Cores</span><span id="lbl-cores" style="color:#22c55e;font-weight:700;">16896</span></div>
 <input type="range" id="sld-cores" min="64" max="32768" step="64" value="16896" oninput="runSim()"></div>
-<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Mem Cap (GB)</span><span id="lbl-memcap" style="color:#f59e0b;font-weight:700;">80</span></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Mem Cap (GB) <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Total memory capacity. Must fit model weights + KV cache. HBM is expensive (~$10/GB) but essential for large models. OOM = model won't run. (Ch. 10)</span></span></span><span id="lbl-memcap" style="color:#f59e0b;font-weight:700;">80</span></div>
 <input type="range" id="sld-memcap" min="1" max="512" step="1" value="80" oninput="runSim()"></div>
-<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Batch Size</span><span id="lbl-batch" style="color:#ec4899;font-weight:700;">32</span></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Batch Size <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Number of concurrent requests. Larger batch = higher throughput but more KV cache memory & higher latency. Decode: scales tokens/s linearly until memory-bound. (Ch. 11)</span></span></span><span id="lbl-batch" style="color:#ec4899;font-weight:700;">32</span></div>
 <input type="range" id="sld-batch" min="1" max="512" step="1" value="32" oninput="runSim()"></div>
-<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Compiler Fusion</span><span id="lbl-fusion" style="color:#06b6d4;font-weight:700;">30%</span></div>
+<div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Compiler Fusion <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Kernel fusion optimization level. Fusing ops reduces memory round-trips, increasing effective arithmetic intensity. Critical for memory-bound workloads. (Ch. 11)</span></span></span><span id="lbl-fusion" style="color:#06b6d4;font-weight:700;">30%</span></div>
 <input type="range" id="sld-fusion" min="0" max="100" step="5" value="30" oninput="runSim()"></div>
 </div>
 </div>
@@ -246,7 +360,7 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <div id="econ-body" class="coll" style="background:var(--sf);border:1px solid var(--bd);border-top:0;border-radius:0 0 8px 8px;margin-top:-5px;">
 <div style="padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
 <div><label style="font-size:8px;color:#52525b;">$/kWh</label><input type="number" id="inp-elec" value="0.12" step="0.01" min="0" onchange="runSim()"></div>
-<div><label style="font-size:8px;color:#52525b;">PUE</label><input type="number" id="inp-pue" value="1.3" step="0.1" min="1" onchange="runSim()"></div>
+<div><label style="font-size:8px;color:var(--text-dim);">PUE <span class="tooltip-wrap"><span class="tooltip-trigger">?</span><span class="tooltip-content">Power Usage Effectiveness = Total Facility Power / IT Equipment Power. Ideal: 1.0. Typical: 1.3-1.6. Includes cooling, lighting, UPS losses. (Ch. 8 Power Iceberg)</span></span></label><input type="number" id="inp-pue" value="1.3" step="0.1" min="1" onchange="runSim()"></div>
 <div><label style="font-size:8px;color:#52525b;">Years</label><input type="number" id="inp-years" value="3" min="1" max="10" onchange="runSim()"></div>
 <div><label style="font-size:8px;color:#52525b;">GPU Count</label><input type="number" id="inp-gpus" value="8" min="1" max="1024" onchange="runSim()"></div>
 <div><label style="font-size:8px;color:#52525b;">Prod Volume</label><input type="number" id="inp-vol" value="1" min="1" onchange="runSim()"></div>
@@ -285,12 +399,13 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <div style="display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;">
 
 <!-- Tab Bar -->
-<div style="display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;">
+<div class="tab-buttons-row" style="display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;">
 <button onclick="showTab('perf')" class="tb ac" id="tab-perf">📊 Performance</button>
 <button onclick="showTab('analysis')" class="tb" id="tab-analysis">🔍 Analysis</button>
 <button onclick="showTab('econ')" class="tb" id="tab-econ">💰 Economics</button>
 <button onclick="showTab('agentic')" class="tb" id="tab-agentic">🤖 Agentic AI</button>
 <button onclick="showTab('compare')" class="tb" id="tab-compare">⚖️ Compare</button>
+<button onclick="showTab('lab')" class="tb" id="tab-lab">🧪 Lab</button>
 </div>
 
 <!-- Metric Cards Row -->
@@ -338,6 +453,12 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 <div class="pn" id="panel-buildvbuy" style="margin-top:5px;"></div>
 <div class="pn" id="panel-swcost" style="margin-top:5px;"></div>
+
+<div id="breakEvenChartContainer" style="margin-top:5px;">
+<div class="pt">📈 Cloud vs On-Premise Break-Even</div>
+<canvas id="breakEvenChart" style="max-height:220px;"></canvas>
+</div>
+
 </div>
 
 <!-- TAB: Agentic AI -->
@@ -355,6 +476,210 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 </div>
 
+
+<!-- TAB: Lab Exercises -->
+<div id="view-lab" style="flex-grow:1;overflow-y:auto;display:none;" class="scr">
+<div class="pn">
+<div class="pt">🧪 Progressive Lab Exercises</div>
+<p style="font-size:10px;color:var(--text-secondary);margin-bottom:10px;">Hands-on exercises to master AI hardware optimization. Work through each exercise, then reveal the solution.</p>
+
+<!-- Chapter 8 -->
+<div class="lab-exercise">
+<h3>📘 Chapter 8: Power & Thermal Management</h3>
+
+<div class="exercise-card">
+<h4>Exercise 8.1: DVFS Trade-off Analysis</h4>
+<p><strong>Scenario:</strong> Your datacenter has limited cooling capacity (600W per GPU). The H100 default TDP is 700W.</p>
+<p><strong>Task:</strong></p>
+<ol>
+<li>Load the H100 preset</li>
+<li>Reduce frequency from 1980 MHz to 1400 MHz</li>
+<li>Observe the TDP change</li>
+<li>Calculate the performance loss vs power savings</li>
+</ol>
+<p><strong>Question:</strong> What is the performance-per-watt improvement?</p>
+<button onclick="document.getElementById('sel-preset').value='h100';loadPreset();document.getElementById('sld-freq').value=1400;runSim();" class="action-btn">⚡ Load Configuration</button>
+<button onclick="toggleSolution('ex-8-1')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-8-1" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<p><strong>Expected Results:</strong></p>
+<ul>
+<li>TDP: 700W → ~520W (26% reduction)</li>
+<li>Performance: 1979 TFLOPS → ~1400 TFLOPS (29% reduction)</li>
+<li>Perf/Watt: 2.83 → 2.69 TFLOPS/W (5% worse)</li>
+</ul>
+<p><strong>Key Insight:</strong> DVFS follows cubic power law (P ∝ V²f). Frequency reduction saves power but hurts efficiency. This is the "DVFS trap" discussed in Chapter 8.</p>
+<p><strong>Better Approach:</strong> Keep frequency high, use power gating or reduce active cores instead.</p>
+</div>
+</div>
+
+<div class="exercise-card">
+<h4>Exercise 8.2: Power Iceberg Calculation</h4>
+<p><strong>Scenario:</strong> Your datacenter has PUE of 1.6 (typical for older facilities).</p>
+<p><strong>Task:</strong></p>
+<ol>
+<li>Calculate chip-to-grid power multiplier</li>
+<li>For 8× H100 cluster, what's the grid power draw?</li>
+<li>What's the annual electricity cost at $0.12/kWh?</li>
+</ol>
+<button onclick="toggleSolution('ex-8-2')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-8-2" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<p><strong>Calculation:</strong></p>
+<ul>
+<li>Chip: 700W (H100 TDP)</li>
+<li>× 1.08 (VRM losses) = 756W at server input</li>
+<li>× 1.10 (PSU losses) = 832W at rack PDU</li>
+<li>× 1.60 (PUE) = 1,331W at grid</li>
+</ul>
+<p><strong>8× GPU Cluster:</strong> 1,331W × 8 = 10.6 kW grid power</p>
+<p><strong>Annual Cost:</strong> 10.6 kW × 8,760 hrs × $0.12/kWh = <strong>$11,155/year</strong></p>
+<p><strong>Key Insight:</strong> Your 700W chip actually costs you 1.9× at the grid (1,331W). Improving PUE from 1.6 → 1.3 saves $2,600/year per 8-GPU cluster.</p>
+</div>
+</div>
+</div>
+
+<!-- Chapter 10 -->
+<div class="lab-exercise">
+<h3>📘 Chapter 10: Memory Subsystems</h3>
+
+<div class="exercise-card">
+<h4>Exercise 10.1: Memory Wall Diagnosis</h4>
+<p><strong>Scenario:</strong> Your LLaMA 3 70B inference is running slower than expected on H100.</p>
+<p><strong>Task:</strong></p>
+<ol>
+<li>Load H100 + LLaMA 3 70B preset</li>
+<li>Check arithmetic intensity (should be ~0.12 for decode)</li>
+<li>Identify the bottleneck</li>
+<li>Calculate theoretical speedup from HBM3 → HBM3e</li>
+</ol>
+<button onclick="document.getElementById('sel-preset').value='h100';loadPreset();document.getElementById('sel-model').value='llama3-70b';onModelChange();" class="action-btn">⚡ Load Configuration</button>
+<button onclick="toggleSolution('ex-10-1')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-10-1" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<p><strong>Analysis:</strong></p>
+<ul>
+<li>Arithmetic Intensity: 0.12 (memory-bound decode phase)</li>
+<li>Roofline: Well below compute ceiling, on memory BW line</li>
+<li>Bottleneck: HBM bandwidth (3.35 TB/s on H100)</li>
+</ul>
+<p><strong>Upgrade to H200 (HBM3e @ 4.8 TB/s):</strong></p>
+<ul>
+<li>Speedup: 4.8 / 3.35 = 1.43× (43% faster)</li>
+<li>Cost increase: ~18%</li>
+<li>ROI: Excellent for memory-bound workloads</li>
+</ul>
+<p><strong>Key Insight:</strong> For inference decode (autoregressive), you're bottlenecked by memory bandwidth, not compute. This is the "Memory Wall" — upgrading compute (more cores) won't help, but faster memory will.</p>
+</div>
+</div>
+</div>
+
+<!-- Chapter 11 -->
+<div class="lab-exercise">
+<h3>📘 Chapter 11: Workload Characterization</h3>
+
+<div class="exercise-card">
+<h4>Exercise 11.1: Bottleneck Identification</h4>
+<p><strong>Scenario:</strong> You're comparing three workloads and need to identify bottlenecks.</p>
+<p><strong>Task:</strong> For each workload, identify the primary bottleneck:</p>
+<ol>
+<li>Training GPT-3 175B (Arithmetic Intensity: 120)</li>
+<li>Inference LLaMA 3 70B Decode (AI: 0.12)</li>
+<li>Edge Inference on Jetson (5W power limit)</li>
+</ol>
+<button onclick="toggleSolution('ex-11-1')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-11-1" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<table class="solution-table">
+<tr><th>Workload</th><th>Arithmetic Intensity</th><th>Bottleneck</th><th>Optimization Priority</th></tr>
+<tr><td>Training GPT-3</td><td>120 (compute-bound)</td><td>🔴 Compute (TFLOPS)</td><td>Add cores, increase frequency, upgrade GPU</td></tr>
+<tr><td>Inference Decode</td><td>0.12 (memory-bound)</td><td>🔴 Memory Bandwidth</td><td>Upgrade to HBM3e/4, use FP8, reduce batch</td></tr>
+<tr><td>Edge Inference</td><td>0.2 (memory-bound)</td><td>🔴 Power Budget</td><td>Use INT8/INT4, aggressive quantization, DVFS</td></tr>
+</table>
+<p><strong>Key Insight:</strong> Different workloads have different bottlenecks. Training needs compute; inference needs memory bandwidth; edge needs power efficiency. One-size-fits-all hardware is inefficient.</p>
+</div>
+</div>
+</div>
+
+<!-- Chapter 14 -->
+<div class="lab-exercise">
+<h3>📘 Chapter 14: Agentic AI</h3>
+
+<div class="exercise-card">
+<h4>Exercise 14.1: Agentic vs Traditional Economics</h4>
+<p><strong>Scenario:</strong> You're sizing a datacenter for 1M queries/day.</p>
+<p><strong>Task:</strong></p>
+<ol>
+<li>Calculate GPUs needed for Traditional Inference (1.2s/query)</li>
+<li>Calculate GPUs needed for Agentic AI (7.2s/query)</li>
+<li>What's the infrastructure cost difference?</li>
+</ol>
+<button onclick="toggleSolution('ex-14-1')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-14-1" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<p><strong>Traditional Inference:</strong></p>
+<ul>
+<li>1M queries/day = 11.6 queries/sec</li>
+<li>At 1.2s/query: Need 11.6 × 1.2 = 13.9 ≈ 14 GPUs</li>
+<li>Cost: 14 × $4,200 = $58,800</li>
+</ul>
+<p><strong>Agentic AI:</strong></p>
+<ul>
+<li>At 7.2s/query: Need 11.6 × 7.2 = 83.5 ≈ 84 GPUs</li>
+<li>But GPU utilization is only 21%, so effective: 84 / 0.21 = 400 GPUs worth of infrastructure</li>
+<li>Cost: 84 × $4,200 = $352,800</li>
+</ul>
+<p><strong>Cost Difference:</strong> $352,800 vs $58,800 = <strong>6× more expensive</strong></p>
+<p><strong>Key Insight:</strong> Agentic AI inverts datacenter economics. You need 4× more CPUs and your GPUs idle 79% of the time during orchestration/tool-calls. But you gain multi-step reasoning, planning, and tool use capabilities.</p>
+<p><strong>Tradeoff:</strong> 6× higher cost, 10× more capable. ROI depends on task value.</p>
+</div>
+</div>
+</div>
+
+<!-- Chapter 16 -->
+<div class="lab-exercise">
+<h3>📘 Chapter 16: Custom Silicon</h3>
+
+<div class="exercise-card">
+<h4>Exercise 16.1: Build vs Buy Decision</h4>
+<p><strong>Scenario:</strong> You're a startup considering custom silicon for your AI accelerator product.</p>
+<p><strong>Given:</strong></p>
+<ul>
+<li>NRE (Silicon + Software): $80M</li>
+<li>Unit cost: $600 (custom) vs $4,200 (H100)</li>
+<li>Performance: 1.3× better than H100</li>
+</ul>
+<p><strong>Task:</strong> Calculate break-even volume</p>
+<button onclick="toggleSolution('ex-16-1')" class="reveal-btn">💡 Show Solution</button>
+<div id="ex-16-1" class="solution" style="display:none;">
+<h5>Solution:</h5>
+<p><strong>Calculation:</strong></p>
+<ul>
+<li>Savings per unit: $4,200 - $600 = $3,600</li>
+<li>Break-even volume: $80M / $3,600 = <strong>22,222 units</strong></li>
+<li>At 10K units/year → 2.2 years to break even</li>
+</ul>
+<p><strong>But wait — Software Risk:</strong></p>
+<ul>
+<li>NVIDIA has 15 years of CUDA ecosystem ($2B+ investment)</li>
+<li>Your $80M includes only basic software stack</li>
+<li>Customer adoption with immature software: ~25%</li>
+<li>Effective break-even: 22,222 / 0.25 = <strong>88,888 units</strong></li>
+<li>At 10K units/year → 8.9 years (most startups fail before this)</li>
+</ul>
+<p><strong>Decision:</strong></p>
+<ul>
+<li>✅ BUILD if: Volume > 100K/year, or willing to invest $200M+ in software</li>
+<li>❌ BUY if: Volume < 50K/year, need fast time-to-market</li>
+</ul>
+<p><strong>Key Insight:</strong> Hardware cost is easy to calculate. Software ecosystem maturity is the hidden killer. This is why Groq, Graphcore, and others struggled despite superior silicon.</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
 <!-- Insight bar -->
 <div class="pn" style="flex-shrink:0;max-height:80px;overflow-y:auto;" class="scr">
 <div style="display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:#71717a;margin-bottom:3px;">
@@ -362,6 +687,35 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 <div id="insight-box" style="font-size:9px;color:#a1a1aa;font-family:'JetBrains Mono',monospace;line-height:1.5;">
 Configure hardware and workload above to see analysis.
+</div>
+</div>
+
+
+<!-- Export & Social -->
+<div class="pn" style="flex-shrink:0;">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+<div>
+<span style="font-size:9px;font-weight:700;color:var(--text-muted);">📤 Export</span>
+<div class="export-section">
+<button onclick="exportJSON()" class="export-btn">💾 JSON</button>
+<button onclick="exportPython()" class="export-btn">🐍 Python</button>
+<button onclick="copyShareableURL()" class="export-btn">🔗 Share URL</button>
+</div>
+</div>
+<div>
+<span style="font-size:9px;font-weight:700;color:var(--text-muted);">📢 Share</span>
+<div class="share-section">
+<button onclick="shareTwitter()" class="share-btn">𝕏 Twitter</button>
+<button onclick="shareLinkedIn()" class="share-btn">in LinkedIn</button>
+<button onclick="shareReddit()" class="share-btn">⬆ Reddit</button>
+</div>
+</div>
+<div>
+<span style="font-size:9px;font-weight:700;color:var(--text-muted);">💬 Feedback</span>
+<div style="margin-top:4px;">
+<a href="https://github.com/kvbulusu/ai-silicon-simulator/issues" target="_blank" class="feedback-link">🐛 Report Bug</a>
+</div>
+</div>
 </div>
 </div>
 
@@ -388,7 +742,7 @@ const $ = id => document.getElementById(id);
 const val = id => {const e=$(id); return e.tagName==='SELECT'?e.value:e.type==='range'?parseFloat(e.value):parseFloat(e.value);}
 
 function showTab(name) {
-    ['perf','analysis','econ','agentic','compare'].forEach(t => {
+    ['perf','analysis','econ','agentic','compare','lab'].forEach(t => {
         const v = $('view-'+t);
         const b = $('tab-'+t);
         if(t===name){v.style.display=t==='perf'?'grid':'block';b.classList.add('ac');}
@@ -511,7 +865,7 @@ function runSim() {
     const pkg = val('sel-pkg');
     const memType = val('sel-mem');
     const link = val('sel-link');
-    const prec = val('sel-prec');
+    let prec = val('sel-prec');
     const cool = val('sel-cool');
     let freq = val('sld-freq');
     const tdpLimit = val('sld-tdp');
@@ -521,6 +875,15 @@ function runSim() {
     const fusion = val('sld-fusion');
     const wtype = val('sel-wtype');
     const modelKey = val('sel-model');
+    
+    // BUG-006 FIX: Validate FP4/MXFP4 only available on Blackwell (B100/B200)
+    const currentPreset = val('sel-preset');
+    const isBlackwell = (currentPreset === 'b100' || currentPreset === 'b200');
+    if(prec === 'fp4' && !isBlackwell) {
+        prec = 'fp8'; // Fall back to FP8
+        $('sel-prec').value = 'fp8';
+        // Warning will be shown in validation panel
+    }
 
     // Update labels
     $('lbl-freq').textContent = freq;
@@ -585,9 +948,13 @@ function runSim() {
     };
     let baseIntensity = wtIntensity[wtype] || 0.15;
 
-    // Model adjustments
+    // Model adjustments (but preserve compute-bound workload intensities)
     const model = MODEL_DB[modelKey];
-    if(model && modelKey !== 'custom') baseIntensity = model.intensity;
+    // Only apply model intensity for memory-bound workloads
+    const isComputeBound = (wtype === 'training' || wtype === 'inference-prefill');
+    if(model && modelKey !== 'custom' && !isComputeBound) {
+        baseIntensity = model.intensity;
+    }
 
     // Compiler fusion boost
     const fusionBoost = 1.0 + (fusion / 100) * 3.0;
@@ -646,10 +1013,24 @@ function runSim() {
     const memUtil = memCeil < Infinity ? Math.min(100, (attained / (effectiveIntensity * effectiveMemBWTBS)) * 100) : 0;
     const thermalUtil = (totalPower / tdpLimit) * 100;
 
-    // Token throughput calculation
-    const modelMem = model ? model.memGB : memCap * 0.8;
-    const fitsInMem = modelMem <= memCap;
+    // Token throughput calculation & memory validation (BUG-007 FIX)
+    let modelMem = model ? model.memGB : memCap * 0.8;
+    // Adjust model memory for precision (FP16 baseline)
+    if(prec === 'fp8' || prec === 'int8') modelMem = modelMem / 2;
+    else if(prec === 'fp4' || prec === 'int4') modelMem = modelMem / 4;
+    else if(prec === 'fp32') modelMem = modelMem * 2;
+    
+    // Calculate KV cache memory (assumes 2048 context length per request)
     const modelParams = model ? model.params : 70e9;
+    const contextLength = 2048; // Default context length
+    const numLayers = Math.sqrt(modelParams / 1e9) * 8; // Rough estimate
+    const hiddenSize = Math.sqrt(modelParams / numLayers);
+    const kvCacheBytesPerToken = 2 * numLayers * hiddenSize * pb; // 2 for K+V
+    const kvCacheGB = (batch * contextLength * kvCacheBytesPerToken) / (1024 ** 3);
+    
+    const totalMemRequired = modelMem + kvCacheGB;
+    const fitsInMem = totalMemRequired <= memCap;
+    const memoryMargin = memCap - totalMemRequired;
     // Prefill: compute-bound → TFLOPS / (2 * params)
     const prefillTokPerSec = (attained * 1e12) / (2 * modelParams);
     // Decode: memory-bound → memBW_bytes / (model_bytes_per_token)
@@ -716,11 +1097,13 @@ function runSim() {
         wtype, modelKey, rawPeakTFLOPS, finalTFLOPS, memBW, linkBW, effectiveIntensity, baseIntensity,
         computeCeil, memCeil, netCeil, attained, bottleneck, computeUtil, memUtil, thermalUtil,
         totalPower, jTemp, thermalThrottle, powerThrottle,
-        prefillTokPerSec, decodeTokPerSec, decodeTokPerSecPerUser, tokPerSec, latencyPerTok, fitsInMem, modelMem: modelMem,
+        prefillTokPerSec, decodeTokPerSec, decodeTokPerSecPerUser, tokPerSec, latencyPerTok, fitsInMem, 
+        modelMem: modelMem, kvCacheGB: kvCacheGB, totalMemRequired: totalMemRequired, memoryMargin: memoryMargin,
         elecRate, pue, years, gpuCount, hwCost, totalCapex, totalPowerCost, maintenanceCost, totalTCO,
         swNRE, totalNRE, unitCost, breakEvenUnits, chipToGrid, vrmLoss, psuLoss,
         agenticPhases, agenticTotal, gpuUtilAgentic, tradLatency, tradQueriesPerHr, agenticQueriesPerHr,
-        effectiveMemBWTBS, commWeight, np, pm, pb
+        effectiveMemBWTBS, commWeight, np, pm, pb,
+        preset: currentPreset, isBlackwell: isBlackwell
     };
 
     // Update all UI
@@ -738,6 +1121,7 @@ function runSim() {
     updateInsights();
     drawRoofline();
     drawSilicon();
+    try { renderBreakEvenChart(); } catch(e) {}
 
     // Header badges
     $('hdr-bn').textContent = bottleneck.replace('⚠️','').trim();
@@ -760,10 +1144,13 @@ function updateMetrics() {
     $('m-tmp').style.color = r.jTemp > 85 ? '#ef4444' : (r.jTemp > 70 ? '#f59e0b' : '#22c55e');
     $('m-tok').textContent = r.tokPerSec > 1000 ? (r.tokPerSec/1000).toFixed(1)+'K' : r.tokPerSec.toFixed(0);
 
-    // Model fit
+    // Model fit (BUG-007 enhancement)
     const fitEl = $('model-fit');
-    if(r.fitsInMem) fitEl.innerHTML = '<span style="color:#22c55e;">✓ Model fits ('+ r.modelMem.toFixed(0) +'GB / '+ r.memCap +'GB)</span>';
-    else fitEl.innerHTML = '<span style="color:#ef4444;">✗ Model too large ('+ r.modelMem.toFixed(0) +'GB > '+ r.memCap +'GB)</span>';
+    if(r.fitsInMem) {
+        fitEl.innerHTML = `<span style="color:#22c55e;">✓ Fits: ${r.modelMem.toFixed(0)}GB model + ${r.kvCacheGB.toFixed(1)}GB KV = ${r.totalMemRequired.toFixed(0)}GB / ${r.memCap}GB (${r.memoryMargin.toFixed(0)}GB free)</span>`;
+    } else {
+        fitEl.innerHTML = `<span style="color:#ef4444;">✗ OOM: ${r.totalMemRequired.toFixed(0)}GB required > ${r.memCap}GB available (shortage: ${(r.totalMemRequired - r.memCap).toFixed(0)}GB)</span>`;
+    }
 }
 
 function updateBottleneckPanel() {
@@ -823,10 +1210,43 @@ function updateWarningsPanel() {
     const dieSize = r.cores * (r.node === '3nm' ? 0.035 : r.node === '5nm' ? 0.05 : 0.08);
     if(dieSize > 800) warnings.push({level:'warning',text:`Die size ~${dieSize.toFixed(0)}mm² exceeds reticle limit. Consider chiplets.`});
     if(dieSize > 1000) warnings.push({level:'critical',text:`Die size ~${dieSize.toFixed(0)}mm² too large for single die. Must use chiplet architecture.`});
-    if(!r.fitsInMem) warnings.push({level:'critical',text:`Model (${r.modelMem.toFixed(0)}GB) exceeds memory capacity (${r.memCap}GB). Multi-GPU or quantize.`});
+    // BUG-007 FIX: Enhanced OOM validation with detailed recommendations
+    if(!r.fitsInMem) {
+        const shortage = r.totalMemRequired - r.memCap;
+        let recommendations = [];
+        // Suggest precision reduction
+        if(r.prec === 'fp16' || r.prec === 'fp32') {
+            recommendations.push(`✅ Enable ${r.prec === 'fp16' ? 'FP8' : 'FP16'} quantization (${r.prec === 'fp16' ? '2×' : '4×'} memory reduction)`);
+        } else if(r.prec === 'fp8' && r.isBlackwell) {
+            recommendations.push(`✅ Enable FP4 quantization on Blackwell (2× further reduction)`);
+        }
+        // Suggest batch size reduction
+        if(r.batch > 1) {
+            const newBatch = Math.max(1, Math.floor(r.batch / 2));
+            recommendations.push(`✅ Reduce batch size to ${newBatch} (saves ~${r.kvCacheGB.toFixed(1)}GB KV cache)`);
+        }
+        // Suggest hardware upgrade
+        const hwSuggestions = [];
+        if(r.totalMemRequired <= 80) hwSuggestions.push('H100 (80GB)');
+        else if(r.totalMemRequired <= 141) hwSuggestions.push('H200 (141GB)');
+        else if(r.totalMemRequired <= 192) hwSuggestions.push('MI300X/B200 (192GB)');
+        else hwSuggestions.push('Multi-GPU setup');
+        if(hwSuggestions.length > 0) {
+            recommendations.push(`✅ Upgrade to ${hwSuggestions[0]}`);
+        }
+        
+        const recText = recommendations.slice(0, 3).join(' | ');
+        warnings.push({
+            level:'critical',
+            text:`🔴 OUT OF MEMORY: Model=${r.modelMem.toFixed(1)}GB + KV=${r.kvCacheGB.toFixed(1)}GB = ${r.totalMemRequired.toFixed(1)}GB > ${r.memCap}GB available. Shortage: ${shortage.toFixed(1)}GB. ${recText}`
+        });
+    }
     if(r.jTemp > 85) warnings.push({level:'warning',text:`Junction temp ${r.jTemp.toFixed(0)}°C approaching limit. Consider better cooling.`});
     if(r.memUtil < 20 && r.computeUtil > 80) warnings.push({level:'info',text:`Memory bandwidth underutilized. Hardware is well-matched for compute-bound work.`});
-    if(r.prec === 'fp4' && !['4nm','3nm','2nm'].includes(r.node)) warnings.push({level:'warning',text:`FP4/MXFP4 requires Blackwell-class (4nm+) hardware for native support.`});
+    // BUG-006 FIX: FP4/MXFP4 only available on Blackwell (B100/B200)
+    if(r.prec === 'fp4' && !r.isBlackwell) {
+        warnings.push({level:'critical',text:`⚠️ FP4/MXFP4 precision is ONLY available on Blackwell architecture (B100/B200). Auto-fallback to FP8 applied.`});
+    }
     if(r.cool === 'passive' && r.tdpLimit > 30) warnings.push({level:'warning',text:`Passive cooling insufficient for ${r.tdpLimit}W. Max recommended: 25W.`});
 
     if(warnings.length === 0) {
@@ -974,7 +1394,7 @@ function updateIcebergPanel() {
     const levels = [
         {name:'Chip', w:chipW, color:'#8b5cf6', loss:''},
         {name:'Server', w:serverW, color:'#6366f1', loss:`VRM +${(r.vrmLoss*100).toFixed(0)}%`},
-        {name:'Rack (×${r.gpuCount})', w:rackW/r.gpuCount, color:'#4f46e5', loss:`PSU +${(r.psuLoss*100).toFixed(0)}%`},
+        {name:`Rack (×${r.gpuCount})`, w:rackW/r.gpuCount, color:'#4f46e5', loss:`PSU +${(r.psuLoss*100).toFixed(0)}%`},
         {name:'Datacenter', w:dcW/r.gpuCount, color:'#4338ca', loss:`PUE ×${r.pue}`},
     ];
 
@@ -1049,7 +1469,7 @@ function updateAgenticPanels() {
     h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;">`;
 
     // Phase timeline bars
-    h += '<div style="margin-bottom:8px;"><b>Query Flow Timeline (${r.agenticTotal.toFixed(1)}s total)</b></div>';
+    h += `<div style="margin-bottom:8px;"><b>Query Flow Timeline (${r.agenticTotal.toFixed(1)}s total)</b></div>`;
     r.agenticPhases.forEach(p => {
         const widthPct = (p.duration / r.agenticTotal) * 100;
         h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -1213,6 +1633,7 @@ function renderComparison() {
 // CANVAS: ROOFLINE
 // ============================================
 function drawRoofline() {
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
     const cv = $('cvRoofline');
     const c = cv.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -1237,17 +1658,17 @@ function drawRoofline() {
     const toY = v => pad.t + ch - (v / maxY) * ch;
 
     // Grid
-    c.strokeStyle = '#1e1b4b';
+    c.strokeStyle = isDark ? '#1e1b4b' : '#e2e8f0';
     c.lineWidth = 0.5;
     [0.01,0.1,1,10,100,1000].forEach(x => {
         c.beginPath(); c.moveTo(toX(x), pad.t); c.lineTo(toX(x), h-pad.b); c.stroke();
-        c.fillStyle = '#52525b'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+        c.fillStyle = isDark ? '#52525b' : '#94a3b8'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
         c.fillText(x>=1?x.toFixed(0):x<0.1?x.toFixed(2):x.toFixed(1), toX(x), h-pad.b+12);
     });
     for(let y = 0; y <= maxY; y += Math.max(100, Math.pow(10, Math.floor(Math.log10(maxY/5))))) {
         if(y === 0) continue;
         c.beginPath(); c.moveTo(pad.l, toY(y)); c.lineTo(w-pad.r, toY(y)); c.stroke();
-        c.fillStyle = '#52525b'; c.font = '8px JetBrains Mono'; c.textAlign = 'right';
+        c.fillStyle = isDark ? '#52525b' : '#94a3b8'; c.font = '8px JetBrains Mono'; c.textAlign = 'right';
         c.fillText(y >= 1000 ? (y/1000).toFixed(0)+'K' : y.toFixed(0), pad.l-4, toY(y)+3);
     }
 
@@ -1282,7 +1703,7 @@ function drawRoofline() {
     c.setLineDash([]);
 
     // Envelope
-    c.strokeStyle = '#e4e4e7'; c.lineWidth = 2.5;
+    c.strokeStyle = isDark ? '#e4e4e7' : '#334155'; c.lineWidth = 2.5;
     c.beginPath();
     for(let i = 0; i <= steps; i++) {
         const lx = minLX + (i/steps)*(maxLX-minLX);
@@ -1302,11 +1723,11 @@ function drawRoofline() {
     }
 
     // Axes
-    c.strokeStyle = '#52525b'; c.lineWidth = 1.5;
+    c.strokeStyle = isDark ? '#52525b' : '#94a3b8'; c.lineWidth = 1.5;
     c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, h-pad.b); c.lineTo(w-pad.r, h-pad.b); c.stroke();
 
     // Labels
-    c.fillStyle = '#a1a1aa'; c.font = '500 9px Space Grotesk'; c.textAlign = 'center';
+    c.fillStyle = isDark ? '#a1a1aa' : '#64748b'; c.font = '500 9px Space Grotesk'; c.textAlign = 'center';
     c.fillText('Arithmetic Intensity (FLOPs/Byte)', w/2, h-4);
     c.save(); c.translate(12, h/2); c.rotate(-Math.PI/2);
     c.fillText('Performance (TFLOPS)', 0, 0);
@@ -1317,7 +1738,7 @@ function drawRoofline() {
     const dy = toY(r.attained);
 
     // Crosshairs
-    c.strokeStyle = 'rgba(244,244,245,.15)'; c.lineWidth = 1; c.setLineDash([3,3]);
+    c.strokeStyle = isDark ? 'rgba(244,244,245,.15)' : 'rgba(30,41,59,.15)'; c.lineWidth = 1; c.setLineDash([3,3]);
     c.beginPath(); c.moveTo(dx, h-pad.b); c.lineTo(dx, dy); c.moveTo(pad.l, dy); c.lineTo(dx, dy); c.stroke();
     c.setLineDash([]);
 
@@ -1333,7 +1754,7 @@ function drawRoofline() {
     lg.forEach((l,i) => {
         const lx = w - pad.r - 80, ly = pad.t + 10 + i*14;
         c.fillStyle = l.c; c.fillRect(lx, ly, 10, 10);
-        c.fillStyle = '#a1a1aa'; c.textAlign = 'left'; c.fillText(l.t, lx+14, ly+8);
+        c.fillStyle = isDark ? '#a1a1aa' : '#64748b'; c.textAlign = 'left'; c.fillText(l.t, lx+14, ly+8);
     });
 }
 
@@ -1341,6 +1762,7 @@ function drawRoofline() {
 // CANVAS: SILICON DIAGRAM
 // ============================================
 function drawSilicon() {
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
     const cv = $('cvSilicon');
     const c = cv.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -1361,7 +1783,7 @@ function drawSilicon() {
     const heatColor = `rgb(${heatR},${heatG},${heatB})`;
 
     // Package substrate
-    c.fillStyle = '#18181b'; c.strokeStyle = '#27272a'; c.lineWidth = 2;
+    c.fillStyle = isDark ? '#18181b' : '#e2e8f0'; c.strokeStyle = isDark ? '#27272a' : '#cbd5e1'; c.lineWidth = 2;
     c.beginPath(); c.roundRect(w*.08, h*.2, w*.84, h*.6, 10); c.fill(); c.stroke();
 
     // Packaging layout
@@ -1419,7 +1841,7 @@ function drawSilicon() {
     }
 
     // Info text
-    c.fillStyle = '#71717a'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
+    c.fillStyle = isDark ? '#71717a' : '#64748b'; c.font = '8px JetBrains Mono'; c.textAlign = 'center';
     c.fillText(`${r.node} | ${r.pkg} | ${r.jTemp.toFixed(0)}°C | ${r.totalPower.toFixed(0)}W`, w*.5, h*.88);
 
     // Throttle indicator
@@ -1436,13 +1858,14 @@ function drawSilicon() {
 function resizeCanvases() {
     drawRoofline();
     drawSilicon();
+    try { renderBreakEvenChart(); } catch(e) {}
 }
 window.addEventListener('resize', () => { if($('view-perf').style.display !== 'none') resizeCanvases(); });
 
 // ============================================
 // EXPORT & SCREENSHOT
 // ============================================
-function exportConfig() {
+function exportConfigLegacy() {
     const blob = new Blob([JSON.stringify(simResult, null, 2)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1470,11 +1893,268 @@ function formatNum(n) {
     return n.toFixed(0);
 }
 
+
+
+// ============================================
+// DARK/LIGHT MODE
+// ============================================
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('stco-theme', next);
+    document.getElementById('theme-toggle').textContent = (next === 'dark' ? '🌙' : '☀️') + ' Theme';
+    // Redraw canvases with updated colors
+    if(document.getElementById('view-perf').style.display !== 'none') resizeCanvases();
+}
+
+// ============================================
+// LAB EXERCISE HELPERS
+// ============================================
+function toggleSolution(id) {
+    const el = document.getElementById(id);
+    if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ============================================
+// BREAK-EVEN CHART
+// ============================================
+let breakEvenChartInstance = null;
+function renderBreakEvenChart() {
+    const r = simResult;
+    if(!r || !r.totalCapex) return;
+    const cv = document.getElementById('breakEvenChart');
+    if(!cv) return;
+    
+    const cloudHourly = 98.32;
+    const cloudPerMonth = cloudHourly * 24 * 30;
+    const onPremCapEx = r.totalCapex;
+    const onPremOpExPerMonth = r.totalPowerCost / (r.years * 12) + r.maintenanceCost / (r.years * 12);
+    
+    const months = [];
+    const cloudCosts = [];
+    const onPremCosts = [];
+    
+    for (let m = 0; m <= 36; m++) {
+        months.push(m);
+        cloudCosts.push(cloudPerMonth * m);
+        onPremCosts.push(onPremCapEx + onPremOpExPerMonth * m);
+    }
+    
+    let breakEvenMonth = 36;
+    for (let i = 1; i < months.length; i++) {
+        if (onPremCosts[i] < cloudCosts[i]) { breakEvenMonth = i; break; }
+    }
+    
+    if(breakEvenChartInstance) breakEvenChartInstance.destroy();
+    
+    const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    const textColor = isDark ? '#a1a1aa' : '#64748b';
+    
+    breakEvenChartInstance = new Chart(cv.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {label:'Cloud (AWS p5.48xlarge)', data:cloudCosts, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.08)', borderWidth:2, fill:true, pointRadius:0},
+                {label:'On-Premise (Your Config)', data:onPremCosts, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.08)', borderWidth:2, fill:true, pointRadius:0}
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {display:true, text:'Break-Even: ~' + breakEvenMonth + ' months', font:{size:12}, color:textColor},
+                legend: {labels:{font:{size:9}, color:textColor, boxWidth:12}}
+            },
+            scales: {
+                x: {title:{display:true, text:'Months', font:{size:9}, color:textColor}, ticks:{font:{size:8}, color:textColor, maxTicksLimit:12}, grid:{color:gridColor}},
+                y: {title:{display:true, text:'Total Cost ($)', font:{size:9}, color:textColor}, ticks:{font:{size:8}, color:textColor, callback:function(v){return '$'+(v/1000).toFixed(0)+'K';}}, grid:{color:gridColor}}
+            }
+        }
+    });
+}
+
+// ============================================
+// EXPORT FUNCTIONS
+// ============================================
+function exportJSON() {
+    const r = simResult;
+    const config = {
+        hardware: val('sel-preset') || 'custom',
+        node: r.node, packaging: r.pkg, memoryType: r.memType, interconnect: r.link,
+        precision: r.prec, cooling: r.cool, frequency: r.freq, tdp: r.tdpLimit,
+        cores: r.cores, memoryCapacity: r.memCap, batchSize: r.batch,
+        compilerFusion: r.fusion, workloadType: r.wtype, model: r.modelKey,
+        results: {
+            attainedTFLOPS: parseFloat(r.attained.toFixed(2)),
+            bottleneck: r.bottleneck,
+            totalPower: parseFloat(r.totalPower.toFixed(1)),
+            junctionTemp: parseFloat(r.jTemp.toFixed(1)),
+            tokensPerSec: parseFloat(r.tokPerSec.toFixed(1)),
+            totalTCO: parseFloat(r.totalTCO.toFixed(0))
+        },
+        timestamp: new Date().toISOString(),
+        version: '2.0',
+        source: 'https://kvbulusu.github.io/ai-silicon-simulator/'
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'stco-config-' + (config.hardware) + '-' + Date.now() + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function exportPython() {
+    const r = simResult;
+    const hw = val('sel-preset') || 'custom';
+    const script = `#!/usr/bin/env python3
+"""
+STCO Simulator - Python Calculator
+Generated from: https://kvbulusu.github.io/ai-silicon-simulator/
+Book: "Bridging AI and Silicon" by Kiran Bulusu
+
+Configuration: ${hw} | ${r.wtype} | ${r.modelKey}
+"""
+
+import math
+
+# Hardware Configuration
+TDP = ${r.tdpLimit}  # Watts
+FREQUENCY = ${r.freq}  # MHz
+CORES = ${r.cores}
+MEMORY_CAP = ${r.memCap}  # GB
+MEMORY_BW = ${r.memBW}  # GB/s
+PRECISION = "${r.prec}"
+
+# Workload Configuration
+BATCH_SIZE = ${r.batch}
+WORKLOAD = "${r.wtype}"
+
+# Calibration (H100 reference: 16896 cores @ 1980 MHz = 989 TFLOPS FP16)
+CALIB = 0.0000296  # TFLOPS per core-MHz at FP16
+
+def calculate():
+    prec_mult = {"fp32":0.5,"fp16":1,"fp8":2,"fp4":4,"int8":2,"int4":4}
+    pm = prec_mult.get(PRECISION, 1)
+    peak = CORES * FREQUENCY * CALIB * pm
+    mem_bw_tbs = MEMORY_BW / 1000
+    intensity = 0.15  # decode default
+    attained = min(peak * 0.85, intensity * mem_bw_tbs)
+    bottleneck = "Compute" if attained == peak * 0.85 else "Memory BW"
+    
+    # Economics (${r.gpuCount} GPUs, ${r.years} years)
+    gpu_count = ${r.gpuCount}
+    years = ${r.years}
+    hw_cost = ${r.hwCost}
+    capex = hw_cost * gpu_count * 1.2
+    power_cost = (TDP * gpu_count / 1000) * ${r.pue} * 8760 * ${r.elecRate} * years
+    tco = capex + power_cost + capex * 0.1 * years
+    
+    print("=" * 50)
+    print("STCO SIMULATOR RESULTS")
+    print("=" * 50)
+    print(f"Peak TFLOPS:     {peak:.1f}")
+    print(f"Attained TFLOPS: {attained:.1f}")
+    print(f"Bottleneck:      {bottleneck}")
+    print("Total TCO:       $" + f"{tco:,.0f}")
+    print("$/TFLOPS-hour:   $" + f"{tco/(attained*gpu_count*years*8760):.4f}")
+    print("=" * 50)
+
+if __name__ == "__main__":
+    calculate()
+`;
+    const blob = new Blob([script], {type:'text/x-python'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'stco-calculator-' + hw + '.py';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function copyShareableURL() {
+    const r = simResult;
+    const params = new URLSearchParams({
+        hw: val('sel-preset') || '',
+        wt: r.wtype, mdl: r.modelKey,
+        node: r.node, pkg: r.pkg, mem: r.memType, link: r.link,
+        prec: r.prec, cool: r.cool,
+        freq: r.freq, tdp: r.tdpLimit, cores: r.cores, memcap: r.memCap,
+        batch: r.batch, fusion: r.fusion
+    });
+    const url = window.location.origin + window.location.pathname + '?' + params.toString();
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.querySelector('[onclick="copyShareableURL()"]');
+        if(btn) { const orig = btn.textContent; btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = orig, 2000); }
+    }).catch(() => {
+        prompt('Copy this URL:', url);
+    });
+}
+
+// Load config from URL params
+function loadFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if(!params.has('hw') && !params.has('freq')) return;
+    if(params.get('hw')) { $('sel-preset').value = params.get('hw'); loadPreset(); }
+    if(params.get('wt')) $('sel-wtype').value = params.get('wt');
+    if(params.get('mdl')) $('sel-model').value = params.get('mdl');
+    if(params.get('node')) $('sel-node').value = params.get('node');
+    if(params.get('pkg')) $('sel-pkg').value = params.get('pkg');
+    if(params.get('mem')) $('sel-mem').value = params.get('mem');
+    if(params.get('link')) $('sel-link').value = params.get('link');
+    if(params.get('prec')) $('sel-prec').value = params.get('prec');
+    if(params.get('cool')) $('sel-cool').value = params.get('cool');
+    if(params.get('freq')) $('sld-freq').value = params.get('freq');
+    if(params.get('tdp')) $('sld-tdp').value = params.get('tdp');
+    if(params.get('cores')) $('sld-cores').value = params.get('cores');
+    if(params.get('memcap')) $('sld-memcap').value = params.get('memcap');
+    if(params.get('batch')) $('sld-batch').value = params.get('batch');
+    if(params.get('fusion')) $('sld-fusion').value = params.get('fusion');
+    runSim();
+}
+
+// ============================================
+// SOCIAL SHARING
+// ============================================
+function shareTwitter() {
+    const r = simResult;
+    const hw = val('sel-preset');
+    const hwName = HW_DB[hw] ? HW_DB[hw].name : 'Custom Config';
+    const text = 'I just analyzed ' + hwName + ' for ' + r.wtype + ' using the STCO Simulator!\n\n' +
+        'Bottleneck: ' + r.bottleneck + '\n' +
+        'Performance: ' + r.attained.toFixed(0) + ' TFLOPS\n' +
+        'TCO: $' + formatNum(r.totalTCO) + '\n\n' +
+        'Try it: https://kvbulusu.github.io/ai-silicon-simulator/\n' +
+        'From "Bridging AI and Silicon" by @kbulusu';
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareLinkedIn() {
+    window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent('https://kvbulusu.github.io/ai-silicon-simulator/'), '_blank');
+}
+
+function shareReddit() {
+    window.open('https://reddit.com/submit?url=' + encodeURIComponent('https://kvbulusu.github.io/ai-silicon-simulator/') + '&title=' + encodeURIComponent('STCO Simulator - Interactive AI Hardware Co-Optimization Tool'), '_blank');
+}
+
+
 // ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Pre-run simulation so values are ready when user dismisses overlay
+    // Load saved theme
+    const savedTheme = localStorage.getItem('stco-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const toggleBtn = document.getElementById('theme-toggle');
+    if(toggleBtn) toggleBtn.textContent = (savedTheme === 'dark' ? '🌙' : '☀️') + ' Theme';
+    
+    // Load URL params if present
+    loadFromURL();
+    
+    // Pre-run simulation
     setTimeout(() => { try { runSim(); } catch(e) { console.error(e); } }, 300);
 });
 
