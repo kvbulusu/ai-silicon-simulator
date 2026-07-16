@@ -13,7 +13,7 @@ Interactive tool for analyzing AI hardware performance, economics, and bottlenec
 This simulator is the interactive companion tool for the book:
 
 **"Bridging AI and Silicon: A Practitioner's Guide"**
-by Kiran Bulusu (24 years semiconductor experience)
+by Kiran Bulusu
 
 The simulator brings to life the frameworks, calculations, and tradeoffs discussed in Chapters 8–16, allowing you to experiment with hardware configurations, workload types, and economic scenarios.
 
