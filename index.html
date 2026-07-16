@@ -216,9 +216,9 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <!-- Sliders -->
 <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
 <div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Clock (MHz)</span><span id="lbl-freq" style="color:#8b5cf6;font-weight:700;">1400</span></div>
-<input type="range" id="sld-freq" min="200" max="2500" step="50" value="1400" oninput="runSim()"></div>
+<input type="range" id="sld-freq" min="200" max="2500" step="30" value="1400" oninput="runSim()"></div>
 <div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>TDP (W)</span><span id="lbl-tdp" style="color:#ef4444;font-weight:700;">700</span></div>
-<input type="range" id="sld-tdp" min="2" max="1200" step="5" value="700" oninput="runSim()"></div>
+<input type="range" id="sld-tdp" min="50" max="2000" step="10" value="700" oninput="runSim()"></div>
 <div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Cores</span><span id="lbl-cores" style="color:#22c55e;font-weight:700;">16896</span></div>
 <input type="range" id="sld-cores" min="64" max="32768" step="64" value="16896" oninput="runSim()"></div>
 <div><div style="display:flex;justify-content:space-between;font-size:8px;color:#52525b;"><span>Mem Cap (GB)</span><span id="lbl-memcap" style="color:#f59e0b;font-weight:700;">80</span></div>
@@ -511,7 +511,7 @@ function runSim() {
     const pkg = val('sel-pkg');
     const memType = val('sel-mem');
     const link = val('sel-link');
-    const prec = val('sel-prec');
+    let prec = val('sel-prec');
     const cool = val('sel-cool');
     let freq = val('sld-freq');
     const tdpLimit = val('sld-tdp');
@@ -521,6 +521,15 @@ function runSim() {
     const fusion = val('sld-fusion');
     const wtype = val('sel-wtype');
     const modelKey = val('sel-model');
+    
+    // BUG-006 FIX: Validate FP4/MXFP4 only available on Blackwell (B100/B200)
+    const currentPreset = val('sel-preset');
+    const isBlackwell = (currentPreset === 'b100' || currentPreset === 'b200');
+    if(prec === 'fp4' && !isBlackwell) {
+        prec = 'fp8'; // Fall back to FP8
+        $('sel-prec').value = 'fp8';
+        // Warning will be shown in validation panel
+    }
 
     // Update labels
     $('lbl-freq').textContent = freq;
@@ -585,9 +594,13 @@ function runSim() {
     };
     let baseIntensity = wtIntensity[wtype] || 0.15;
 
-    // Model adjustments
+    // Model adjustments (but preserve compute-bound workload intensities)
     const model = MODEL_DB[modelKey];
-    if(model && modelKey !== 'custom') baseIntensity = model.intensity;
+    // Only apply model intensity for memory-bound workloads
+    const isComputeBound = (wtype === 'training' || wtype === 'inference-prefill');
+    if(model && modelKey !== 'custom' && !isComputeBound) {
+        baseIntensity = model.intensity;
+    }
 
     // Compiler fusion boost
     const fusionBoost = 1.0 + (fusion / 100) * 3.0;
@@ -646,10 +659,24 @@ function runSim() {
     const memUtil = memCeil < Infinity ? Math.min(100, (attained / (effectiveIntensity * effectiveMemBWTBS)) * 100) : 0;
     const thermalUtil = (totalPower / tdpLimit) * 100;
 
-    // Token throughput calculation
-    const modelMem = model ? model.memGB : memCap * 0.8;
-    const fitsInMem = modelMem <= memCap;
+    // Token throughput calculation & memory validation (BUG-007 FIX)
+    let modelMem = model ? model.memGB : memCap * 0.8;
+    // Adjust model memory for precision (FP16 baseline)
+    if(prec === 'fp8' || prec === 'int8') modelMem = modelMem / 2;
+    else if(prec === 'fp4' || prec === 'int4') modelMem = modelMem / 4;
+    else if(prec === 'fp32') modelMem = modelMem * 2;
+    
+    // Calculate KV cache memory (assumes 2048 context length per request)
     const modelParams = model ? model.params : 70e9;
+    const contextLength = 2048; // Default context length
+    const numLayers = Math.sqrt(modelParams / 1e9) * 8; // Rough estimate
+    const hiddenSize = Math.sqrt(modelParams / numLayers);
+    const kvCacheBytesPerToken = 2 * numLayers * hiddenSize * pb; // 2 for K+V
+    const kvCacheGB = (batch * contextLength * kvCacheBytesPerToken) / (1024 ** 3);
+    
+    const totalMemRequired = modelMem + kvCacheGB;
+    const fitsInMem = totalMemRequired <= memCap;
+    const memoryMargin = memCap - totalMemRequired;
     // Prefill: compute-bound → TFLOPS / (2 * params)
     const prefillTokPerSec = (attained * 1e12) / (2 * modelParams);
     // Decode: memory-bound → memBW_bytes / (model_bytes_per_token)
@@ -716,11 +743,13 @@ function runSim() {
         wtype, modelKey, rawPeakTFLOPS, finalTFLOPS, memBW, linkBW, effectiveIntensity, baseIntensity,
         computeCeil, memCeil, netCeil, attained, bottleneck, computeUtil, memUtil, thermalUtil,
         totalPower, jTemp, thermalThrottle, powerThrottle,
-        prefillTokPerSec, decodeTokPerSec, decodeTokPerSecPerUser, tokPerSec, latencyPerTok, fitsInMem, modelMem: modelMem,
+        prefillTokPerSec, decodeTokPerSec, decodeTokPerSecPerUser, tokPerSec, latencyPerTok, fitsInMem, 
+        modelMem: modelMem, kvCacheGB: kvCacheGB, totalMemRequired: totalMemRequired, memoryMargin: memoryMargin,
         elecRate, pue, years, gpuCount, hwCost, totalCapex, totalPowerCost, maintenanceCost, totalTCO,
         swNRE, totalNRE, unitCost, breakEvenUnits, chipToGrid, vrmLoss, psuLoss,
         agenticPhases, agenticTotal, gpuUtilAgentic, tradLatency, tradQueriesPerHr, agenticQueriesPerHr,
-        effectiveMemBWTBS, commWeight, np, pm, pb
+        effectiveMemBWTBS, commWeight, np, pm, pb,
+        preset: currentPreset, isBlackwell: isBlackwell
     };
 
     // Update all UI
@@ -760,10 +789,13 @@ function updateMetrics() {
     $('m-tmp').style.color = r.jTemp > 85 ? '#ef4444' : (r.jTemp > 70 ? '#f59e0b' : '#22c55e');
     $('m-tok').textContent = r.tokPerSec > 1000 ? (r.tokPerSec/1000).toFixed(1)+'K' : r.tokPerSec.toFixed(0);
 
-    // Model fit
+    // Model fit (BUG-007 enhancement)
     const fitEl = $('model-fit');
-    if(r.fitsInMem) fitEl.innerHTML = '<span style="color:#22c55e;">✓ Model fits ('+ r.modelMem.toFixed(0) +'GB / '+ r.memCap +'GB)</span>';
-    else fitEl.innerHTML = '<span style="color:#ef4444;">✗ Model too large ('+ r.modelMem.toFixed(0) +'GB > '+ r.memCap +'GB)</span>';
+    if(r.fitsInMem) {
+        fitEl.innerHTML = `<span style="color:#22c55e;">✓ Fits: ${r.modelMem.toFixed(0)}GB model + ${r.kvCacheGB.toFixed(1)}GB KV = ${r.totalMemRequired.toFixed(0)}GB / ${r.memCap}GB (${r.memoryMargin.toFixed(0)}GB free)</span>`;
+    } else {
+        fitEl.innerHTML = `<span style="color:#ef4444;">✗ OOM: ${r.totalMemRequired.toFixed(0)}GB required > ${r.memCap}GB available (shortage: ${(r.totalMemRequired - r.memCap).toFixed(0)}GB)</span>`;
+    }
 }
 
 function updateBottleneckPanel() {
@@ -823,10 +855,43 @@ function updateWarningsPanel() {
     const dieSize = r.cores * (r.node === '3nm' ? 0.035 : r.node === '5nm' ? 0.05 : 0.08);
     if(dieSize > 800) warnings.push({level:'warning',text:`Die size ~${dieSize.toFixed(0)}mm² exceeds reticle limit. Consider chiplets.`});
     if(dieSize > 1000) warnings.push({level:'critical',text:`Die size ~${dieSize.toFixed(0)}mm² too large for single die. Must use chiplet architecture.`});
-    if(!r.fitsInMem) warnings.push({level:'critical',text:`Model (${r.modelMem.toFixed(0)}GB) exceeds memory capacity (${r.memCap}GB). Multi-GPU or quantize.`});
+    // BUG-007 FIX: Enhanced OOM validation with detailed recommendations
+    if(!r.fitsInMem) {
+        const shortage = r.totalMemRequired - r.memCap;
+        let recommendations = [];
+        // Suggest precision reduction
+        if(r.prec === 'fp16' || r.prec === 'fp32') {
+            recommendations.push(`✅ Enable ${r.prec === 'fp16' ? 'FP8' : 'FP16'} quantization (${r.prec === 'fp16' ? '2×' : '4×'} memory reduction)`);
+        } else if(r.prec === 'fp8' && r.isBlackwell) {
+            recommendations.push(`✅ Enable FP4 quantization on Blackwell (2× further reduction)`);
+        }
+        // Suggest batch size reduction
+        if(r.batch > 1) {
+            const newBatch = Math.max(1, Math.floor(r.batch / 2));
+            recommendations.push(`✅ Reduce batch size to ${newBatch} (saves ~${r.kvCacheGB.toFixed(1)}GB KV cache)`);
+        }
+        // Suggest hardware upgrade
+        const hwSuggestions = [];
+        if(r.totalMemRequired <= 80) hwSuggestions.push('H100 (80GB)');
+        else if(r.totalMemRequired <= 141) hwSuggestions.push('H200 (141GB)');
+        else if(r.totalMemRequired <= 192) hwSuggestions.push('MI300X/B200 (192GB)');
+        else hwSuggestions.push('Multi-GPU setup');
+        if(hwSuggestions.length > 0) {
+            recommendations.push(`✅ Upgrade to ${hwSuggestions[0]}`);
+        }
+        
+        const recText = recommendations.slice(0, 3).join(' | ');
+        warnings.push({
+            level:'critical',
+            text:`🔴 OUT OF MEMORY: Model=${r.modelMem.toFixed(1)}GB + KV=${r.kvCacheGB.toFixed(1)}GB = ${r.totalMemRequired.toFixed(1)}GB > ${r.memCap}GB available. Shortage: ${shortage.toFixed(1)}GB. ${recText}`
+        });
+    }
     if(r.jTemp > 85) warnings.push({level:'warning',text:`Junction temp ${r.jTemp.toFixed(0)}°C approaching limit. Consider better cooling.`});
     if(r.memUtil < 20 && r.computeUtil > 80) warnings.push({level:'info',text:`Memory bandwidth underutilized. Hardware is well-matched for compute-bound work.`});
-    if(r.prec === 'fp4' && !['4nm','3nm','2nm'].includes(r.node)) warnings.push({level:'warning',text:`FP4/MXFP4 requires Blackwell-class (4nm+) hardware for native support.`});
+    // BUG-006 FIX: FP4/MXFP4 only available on Blackwell (B100/B200)
+    if(r.prec === 'fp4' && !r.isBlackwell) {
+        warnings.push({level:'critical',text:`⚠️ FP4/MXFP4 precision is ONLY available on Blackwell architecture (B100/B200). Auto-fallback to FP8 applied.`});
+    }
     if(r.cool === 'passive' && r.tdpLimit > 30) warnings.push({level:'warning',text:`Passive cooling insufficient for ${r.tdpLimit}W. Max recommended: 25W.`});
 
     if(warnings.length === 0) {
@@ -974,7 +1039,7 @@ function updateIcebergPanel() {
     const levels = [
         {name:'Chip', w:chipW, color:'#8b5cf6', loss:''},
         {name:'Server', w:serverW, color:'#6366f1', loss:`VRM +${(r.vrmLoss*100).toFixed(0)}%`},
-        {name:'Rack (×${r.gpuCount})', w:rackW/r.gpuCount, color:'#4f46e5', loss:`PSU +${(r.psuLoss*100).toFixed(0)}%`},
+        {name:`Rack (×${r.gpuCount})`, w:rackW/r.gpuCount, color:'#4f46e5', loss:`PSU +${(r.psuLoss*100).toFixed(0)}%`},
         {name:'Datacenter', w:dcW/r.gpuCount, color:'#4338ca', loss:`PUE ×${r.pue}`},
     ];
 
@@ -1049,7 +1114,7 @@ function updateAgenticPanels() {
     h += `<div style="font-size:9px;font-family:'JetBrains Mono',monospace;">`;
 
     // Phase timeline bars
-    h += '<div style="margin-bottom:8px;"><b>Query Flow Timeline (${r.agenticTotal.toFixed(1)}s total)</b></div>';
+    h += `<div style="margin-bottom:8px;"><b>Query Flow Timeline (${r.agenticTotal.toFixed(1)}s total)</b></div>`;
     r.agenticPhases.forEach(p => {
         const widthPct = (p.duration / r.agenticTotal) * 100;
         h += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
