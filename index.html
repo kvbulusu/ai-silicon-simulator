@@ -251,6 +251,7 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <option value="yi-34b">Yi 34B (68GB)</option>
 </optgroup>
 <optgroup label="Large (175B+)">
+<option value="llama3-405b">LLaMA 3.1 405B (810GB)</option>
 <option value="gpt35-scale">GPT-3.5 scale ~175B (350GB)</option>
 <option value="gpt4-scale">GPT-4 scale ~1.8T MoE (3.6TB)</option>
 </optgroup>
@@ -272,13 +273,21 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <option value="h200">H200 (5nm, 700W, 141GB)</option>
 <option value="b100">B100 (4nm, 700W, 192GB)</option>
 <option value="b200">B200 (4nm, 1000W, 192GB)</option>
+<option value="gb200">GB200 NVL72 (4nm, 1000W, 192GB/GPU)</option>
 </optgroup>
 <optgroup label="AMD">
 <option value="mi300x">MI300X (5nm, 750W)</option>
 <option value="mi350">MI350 (3nm, 750W)</option>
 </optgroup>
 <optgroup label="Intel">
-<option value="gaudi3">Gaudi 3 (5nm, 600W)</option>
+<option value="gaudi2">Gaudi 2 (7nm, 600W, 96GB)</option>
+<option value="gaudi3">Gaudi 3 (5nm, 600W, 128GB)</option>
+</optgroup>
+<optgroup label="Google Cloud">
+<option value="tpu-v5p">TPU v5p (7nm, 250W, 95GB HBM)</option>
+</optgroup>
+<optgroup label="AWS">
+<option value="trainium2">Trainium2 (5nm, 500W, 96GB HBM3e)</option>
 </optgroup>
 <optgroup label="Edge AI">
 <option value="jetson-orin-nx">Jetson Orin NX (25W)</option>
@@ -725,8 +734,8 @@ Configure hardware and workload above to see analysis.
 </div><!-- end app -->
 
 <script>
-const HW_DB = {"h100": {"name": "NVIDIA H100 SXM5", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3", "memBW": 3350, "memCap": 80, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 25000}, "h200": {"name": "NVIDIA H200", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3e", "memBW": 4800, "memCap": 141, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 30000}, "b100": {"name": "NVIDIA B100", "node": "4nm", "pkg": "2.5d", "freq": 1800, "tdp": 700, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 18432, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 35000}, "b200": {"name": "NVIDIA B200", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 40000}, "a100": {"name": "NVIDIA A100 PCIe", "node": "7nm", "pkg": "monolithic", "freq": 1410, "tdp": 400, "memType": "hbm2e", "memBW": 2000, "memCap": 80, "cores": 6912, "interconnect": "pcie5", "precision": "fp16", "cooling": "air", "category": "datacenter", "year": 2020, "costEst": 10000}, "mi300x": {"name": "AMD MI300X", "node": "5nm", "pkg": "3d", "freq": 1700, "tdp": 750, "memType": "hbm3", "memBW": 5300, "memCap": 192, "cores": 19456, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 22000}, "mi350": {"name": "AMD MI350", "node": "3nm", "pkg": "3d", "freq": 1900, "tdp": 750, "memType": "hbm3e", "memBW": 6000, "memCap": 288, "cores": 20480, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 28000}, "gaudi3": {"name": "Intel Gaudi 3", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 600, "memType": "hbm2e", "memBW": 3700, "memCap": 128, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 15000}, "jetson-orin-nx": {"name": "Jetson Orin NX", "node": "7nm", "pkg": "monolithic", "freq": 918, "tdp": 25, "memType": "lpddr5", "memBW": 100, "memCap": 16, "cores": 1024, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 500}, "jetson-agx-orin": {"name": "Jetson AGX Orin", "node": "7nm", "pkg": "monolithic", "freq": 1300, "tdp": 60, "memType": "lpddr5", "memBW": 205, "memCap": 64, "cores": 2048, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 1200}, "cloud-ai-100": {"name": "Qualcomm Cloud AI 100", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 75, "memType": "ddr5", "memBW": 134, "memCap": 32, "cores": 4096, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 800}, "edge-tpu": {"name": "Google Edge TPU", "node": "14nm", "pkg": "monolithic", "freq": 500, "tdp": 4, "memType": "ddr5", "memBW": 8, "memCap": 2, "cores": 256, "interconnect": "usb", "precision": "int8", "cooling": "passive", "category": "edge", "year": 2022, "costEst": 75}, "core-ultra": {"name": "Intel Core Ultra NPU", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 400, "tops": 34}, "ryzen-ai": {"name": "AMD Ryzen AI NPU", "node": "4nm", "pkg": "monolithic", "freq": 1600, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 350, "tops": 16}, "snapdragon-x": {"name": "Snapdragon X Elite NPU", "node": "4nm", "pkg": "monolithic", "freq": 1800, "tdp": 23, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 500, "tops": 45}, "apple-m4": {"name": "Apple M4 Neural Engine", "node": "3nm", "pkg": "monolithic", "freq": 2000, "tdp": 22, "memType": "lpddr5", "memBW": 120, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "fp16", "cooling": "passive", "category": "aipc", "year": 2024, "costEst": 600, "tops": 18}};
-const MODEL_DB = {"llama3-8b": {"name": "LLaMA 3 8B", "params": 8000000000.0, "memGB": 16, "intensity": 0.15, "batchDefault": 64}, "mistral-7b": {"name": "Mistral 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.15, "batchDefault": 64}, "gemma-7b": {"name": "Gemma 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.14, "batchDefault": 64}, "llama3-70b": {"name": "LLaMA 3 70B", "params": 70000000000.0, "memGB": 140, "intensity": 0.12, "batchDefault": 32}, "mixtral-8x7b": {"name": "Mixtral 8\u00d77B", "params": 47000000000.0, "memGB": 94, "intensity": 0.13, "batchDefault": 32}, "yi-34b": {"name": "Yi 34B", "params": 34000000000.0, "memGB": 68, "intensity": 0.13, "batchDefault": 32}, "gpt35-scale": {"name": "GPT-3.5 Scale (~175B)", "params": 175000000000.0, "memGB": 350, "intensity": 0.1, "batchDefault": 16}, "gpt4-scale": {"name": "GPT-4 Scale (~1.8T MoE)", "params": 1800000000000.0, "memGB": 3600, "intensity": 0.08, "batchDefault": 8}, "llava-13b": {"name": "LLaVA 13B", "params": 13000000000.0, "memGB": 26, "intensity": 0.18, "batchDefault": 32}};
+const HW_DB = {"h100": {"name": "NVIDIA H100 SXM5", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3", "memBW": 3350, "memCap": 80, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 25000}, "h200": {"name": "NVIDIA H200", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3e", "memBW": 4800, "memCap": 141, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 30000}, "b100": {"name": "NVIDIA B100", "node": "4nm", "pkg": "2.5d", "freq": 1800, "tdp": 700, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 18432, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 35000}, "b200": {"name": "NVIDIA B200", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 40000}, "a100": {"name": "NVIDIA A100 PCIe", "node": "7nm", "pkg": "monolithic", "freq": 1410, "tdp": 400, "memType": "hbm2e", "memBW": 2000, "memCap": 80, "cores": 6912, "interconnect": "pcie5", "precision": "fp16", "cooling": "air", "category": "datacenter", "year": 2020, "costEst": 10000}, "mi300x": {"name": "AMD MI300X", "node": "5nm", "pkg": "3d", "freq": 1700, "tdp": 750, "memType": "hbm3", "memBW": 5300, "memCap": 192, "cores": 19456, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 22000}, "mi350": {"name": "AMD MI350", "node": "3nm", "pkg": "3d", "freq": 1900, "tdp": 750, "memType": "hbm3e", "memBW": 6000, "memCap": 288, "cores": 20480, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 28000}, "gaudi3": {"name": "Intel Gaudi 3", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 600, "memType": "hbm2e", "memBW": 3700, "memCap": 128, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 15000}, "jetson-orin-nx": {"name": "Jetson Orin NX", "node": "7nm", "pkg": "monolithic", "freq": 918, "tdp": 25, "memType": "lpddr5", "memBW": 100, "memCap": 16, "cores": 1024, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 500}, "jetson-agx-orin": {"name": "Jetson AGX Orin", "node": "7nm", "pkg": "monolithic", "freq": 1300, "tdp": 60, "memType": "lpddr5", "memBW": 205, "memCap": 64, "cores": 2048, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 1200}, "cloud-ai-100": {"name": "Qualcomm Cloud AI 100", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 75, "memType": "ddr5", "memBW": 134, "memCap": 32, "cores": 4096, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 800}, "edge-tpu": {"name": "Google Edge TPU", "node": "14nm", "pkg": "monolithic", "freq": 500, "tdp": 4, "memType": "ddr5", "memBW": 8, "memCap": 2, "cores": 256, "interconnect": "usb", "precision": "int8", "cooling": "passive", "category": "edge", "year": 2022, "costEst": 75}, "core-ultra": {"name": "Intel Core Ultra NPU", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 400, "tops": 34}, "ryzen-ai": {"name": "AMD Ryzen AI NPU", "node": "4nm", "pkg": "monolithic", "freq": 1600, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 350, "tops": 16}, "snapdragon-x": {"name": "Snapdragon X Elite NPU", "node": "4nm", "pkg": "monolithic", "freq": 1800, "tdp": 23, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 500, "tops": 45}, "apple-m4": {"name": "Apple M4 Neural Engine", "node": "3nm", "pkg": "monolithic", "freq": 2000, "tdp": 22, "memType": "lpddr5", "memBW": 120, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "fp16", "cooling": "passive", "category": "aipc", "year": 2024, "costEst": 600, "tops": 18}, "gb200": {"name": "NVIDIA GB200 NVL72", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 60000}, "gaudi2": {"name": "Intel Gaudi 2", "node": "7nm", "pkg": "2.5d", "freq": 1350, "tdp": 600, "memType": "hbm2e", "memBW": 2450, "memCap": 96, "cores": 4096, "interconnect": "pcie5", "precision": "fp16", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 12000}, "tpu-v5p": {"name": "Google TPU v5p", "node": "7nm", "pkg": "2.5d", "freq": 1750, "tdp": 250, "memType": "hbm2e", "memBW": 2760, "memCap": 95, "cores": 8192, "interconnect": "pcie5", "precision": "int8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 0, "cloudOnly": true, "tooltip": "2.76 TB/s HBM bandwidth; 4.8 TB/s is ICI interconnect bandwidth between chips, not memory BW"}, "trainium2": {"name": "AWS Trainium2", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 500, "memType": "hbm3e", "memBW": 2460, "memCap": 96, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 0, "cloudOnly": true, "tooltip": "96GB per chip; multi-chip UltraServer pods scale to 512GB+"}};
+const MODEL_DB = {"llama3-8b": {"name": "LLaMA 3 8B", "params": 8000000000.0, "memGB": 16, "intensity": 0.15, "batchDefault": 64}, "mistral-7b": {"name": "Mistral 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.15, "batchDefault": 64}, "gemma-7b": {"name": "Gemma 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.14, "batchDefault": 64}, "llama3-70b": {"name": "LLaMA 3 70B", "params": 70000000000.0, "memGB": 140, "intensity": 0.12, "batchDefault": 32}, "mixtral-8x7b": {"name": "Mixtral 8\u00d77B", "params": 47000000000.0, "memGB": 94, "intensity": 0.13, "batchDefault": 32}, "yi-34b": {"name": "Yi 34B", "params": 34000000000.0, "memGB": 68, "intensity": 0.13, "batchDefault": 32}, "gpt35-scale": {"name": "GPT-3.5 Scale (~175B)", "params": 175000000000.0, "memGB": 350, "intensity": 0.1, "batchDefault": 16}, "gpt4-scale": {"name": "GPT-4 Scale (~1.8T MoE)", "params": 1800000000000.0, "memGB": 3600, "intensity": 0.08, "batchDefault": 8}, "llava-13b": {"name": "LLaVA 13B", "params": 13000000000.0, "memGB": 26, "intensity": 0.18, "batchDefault": 32}, "llama3-405b": {"name": "LLaMA 3.1 405B", "params": 405000000000.0, "memGB": 810, "intensity": 0.09, "batchDefault": 4}};
 
 // ============================================
 // STATE
@@ -878,7 +887,7 @@ function runSim() {
     
     // BUG-006 FIX: Validate FP4/MXFP4 only available on Blackwell (B100/B200)
     const currentPreset = val('sel-preset');
-    const isBlackwell = (currentPreset === 'b100' || currentPreset === 'b200');
+    const isBlackwell = (currentPreset === 'b100' || currentPreset === 'b200' || currentPreset === 'gb200');
     if(prec === 'fp4' && !isBlackwell) {
         prec = 'fp8'; // Fall back to FP8
         $('sel-prec').value = 'fp8';
@@ -1198,65 +1207,261 @@ function updateBottleneckPanel() {
     $('panel-bottleneck').innerHTML = h;
 }
 
-function updateWarningsPanel() {
-    const r = simResult;
-    let h = '<div class="pt">⚠️ Configuration Warnings</div>';
-    let warnings = [];
+function validateConfiguration(r) {
+    const errors = [];
+    const warnings = [];
+    const info = [];
 
-    if(r.totalPower > r.tdpLimit) {
-        warnings.push({level:'critical',text:`TDP (${r.totalPower.toFixed(0)}W) exceeds limit (${r.tdpLimit}W) → Throttling to ${r.simFreq} MHz`});
-    }
-    // Die size estimate
-    const dieSize = r.cores * (r.node === '3nm' ? 0.035 : r.node === '5nm' ? 0.05 : 0.08);
-    if(dieSize > 800) warnings.push({level:'warning',text:`Die size ~${dieSize.toFixed(0)}mm² exceeds reticle limit. Consider chiplets.`});
-    if(dieSize > 1000) warnings.push({level:'critical',text:`Die size ~${dieSize.toFixed(0)}mm² too large for single die. Must use chiplet architecture.`});
-    // BUG-007 FIX: Enhanced OOM validation with detailed recommendations
+    // 1. MEMORY CONSTRAINT CHECK
     if(!r.fitsInMem) {
         const shortage = r.totalMemRequired - r.memCap;
-        let recommendations = [];
-        // Suggest precision reduction
+        let suggestions = [];
         if(r.prec === 'fp16' || r.prec === 'fp32') {
-            recommendations.push(`✅ Enable ${r.prec === 'fp16' ? 'FP8' : 'FP16'} quantization (${r.prec === 'fp16' ? '2×' : '4×'} memory reduction)`);
+            suggestions.push(`Enable ${r.prec === 'fp16' ? 'FP8' : 'FP16'} quantization (${r.prec === 'fp16' ? '2×' : '4×'} memory reduction)`);
         } else if(r.prec === 'fp8' && r.isBlackwell) {
-            recommendations.push(`✅ Enable FP4 quantization on Blackwell (2× further reduction)`);
+            suggestions.push('Enable FP4 on Blackwell (2× further reduction)');
         }
-        // Suggest batch size reduction
         if(r.batch > 1) {
             const newBatch = Math.max(1, Math.floor(r.batch / 2));
-            recommendations.push(`✅ Reduce batch size to ${newBatch} (saves ~${r.kvCacheGB.toFixed(1)}GB KV cache)`);
+            suggestions.push(`Reduce batch size to ${newBatch} (saves ~${(r.kvCacheGB/2).toFixed(1)}GB KV cache)`);
         }
-        // Suggest hardware upgrade
-        const hwSuggestions = [];
-        if(r.totalMemRequired <= 80) hwSuggestions.push('H100 (80GB)');
-        else if(r.totalMemRequired <= 141) hwSuggestions.push('H200 (141GB)');
-        else if(r.totalMemRequired <= 192) hwSuggestions.push('MI300X/B200 (192GB)');
-        else hwSuggestions.push('Multi-GPU setup');
-        if(hwSuggestions.length > 0) {
-            recommendations.push(`✅ Upgrade to ${hwSuggestions[0]}`);
-        }
-        
-        const recText = recommendations.slice(0, 3).join(' | ');
-        warnings.push({
-            level:'critical',
-            text:`🔴 OUT OF MEMORY: Model=${r.modelMem.toFixed(1)}GB + KV=${r.kvCacheGB.toFixed(1)}GB = ${r.totalMemRequired.toFixed(1)}GB > ${r.memCap}GB available. Shortage: ${shortage.toFixed(1)}GB. ${recText}`
+        if(r.totalMemRequired <= 80) suggestions.push('Upgrade to H100 (80GB)');
+        else if(r.totalMemRequired <= 141) suggestions.push('Upgrade to H200 (141GB)');
+        else if(r.totalMemRequired <= 192) suggestions.push('Upgrade to MI300X/B200/GB200 (192GB)');
+        else if(r.totalMemRequired <= 288) suggestions.push('Upgrade to MI350 (288GB)');
+        else suggestions.push('Multi-GPU tensor parallelism required');
+        errors.push({type:'MEMORY',severity:'CRITICAL',icon:'🔴',
+            title:'IMPOSSIBLE: Insufficient Memory',
+            message:`Requires ${r.totalMemRequired.toFixed(1)}GB (model: ${r.modelMem.toFixed(1)}GB + KV: ${r.kvCacheGB.toFixed(1)}GB) but only ${r.memCap}GB available. Shortage: ${shortage.toFixed(1)}GB.`,
+            suggestions: suggestions
+        });
+    } else if(r.totalMemRequired > r.memCap * 0.9) {
+        warnings.push({type:'MEMORY',severity:'HIGH',icon:'🟡',
+            title:'CAUTION: Memory Usage >90%',
+            message:`Using ${((r.totalMemRequired/r.memCap)*100).toFixed(1)}% of available memory (${r.totalMemRequired.toFixed(1)}GB / ${r.memCap}GB). Risk of OOM errors in production.`,
+            suggestions:['Reduce batch size slightly for safety margin','Monitor actual memory usage closely in production']
         });
     }
-    if(r.jTemp > 85) warnings.push({level:'warning',text:`Junction temp ${r.jTemp.toFixed(0)}°C approaching limit. Consider better cooling.`});
-    if(r.memUtil < 20 && r.computeUtil > 80) warnings.push({level:'info',text:`Memory bandwidth underutilized. Hardware is well-matched for compute-bound work.`});
-    // BUG-006 FIX: FP4/MXFP4 only available on Blackwell (B100/B200)
-    if(r.prec === 'fp4' && !r.isBlackwell) {
-        warnings.push({level:'critical',text:`⚠️ FP4/MXFP4 precision is ONLY available on Blackwell architecture (B100/B200). Auto-fallback to FP8 applied.`});
-    }
-    if(r.cool === 'passive' && r.tdpLimit > 30) warnings.push({level:'warning',text:`Passive cooling insufficient for ${r.tdpLimit}W. Max recommended: 25W.`});
 
-    if(warnings.length === 0) {
+    // 2. POWER/THERMAL CHECKS
+    if(r.totalPower > r.tdpLimit) {
+        errors.push({type:'POWER',severity:'CRITICAL',icon:'🔴',
+            title:'TDP Exceeded — Throttling Active',
+            message:`${r.totalPower.toFixed(0)}W exceeds ${r.tdpLimit}W limit → Clock throttled from ${r.freq} to ${r.simFreq} MHz.`,
+            suggestions:['Switch to liquid cooling','Reduce clock frequency','Upgrade to lower-power process node']
+        });
+    }
+    if(r.tdpLimit > 700 && r.cool !== 'liquid') {
+        warnings.push({type:'POWER',severity:'HIGH',icon:'🟠',
+            title:'POWER: High TDP Without Liquid Cooling',
+            message:`${r.tdpLimit}W TDP with ${r.cool} cooling is impractical. Air cooling max ~600W sustained.`,
+            suggestions:[`Switch to liquid cooling (required above 600W)`,`Budget ~$50k-100k per rack for liquid cooling infrastructure`]
+        });
+    }
+    if(r.tdpLimit >= 1000) {
+        warnings.push({type:'POWER',severity:'MEDIUM',icon:'🟡',
+            title:'POWER: Extreme TDP — DLC Required',
+            message:`${r.tdpLimit}W per device requires direct liquid cooling (DLC) or immersion cooling.`,
+            suggestions:['Standard air cooling cannot handle >600W sustained','Plan for specialized cooling infrastructure','Check datacenter power delivery capacity']
+        });
+    }
+    if(r.cool === 'passive' && r.tdpLimit > 30) {
+        warnings.push({type:'POWER',severity:'HIGH',icon:'🟠',
+            title:'COOLING: Passive Cooling Insufficient',
+            message:`Passive cooling insufficient for ${r.tdpLimit}W. Max recommended for passive: 25W.`,
+            suggestions:['Switch to active air or liquid cooling']
+        });
+    }
+
+    // 3. BOTTLENECK DETECTION
+    if(r.memUtil > 90 && r.computeUtil < 50) {
+        warnings.push({type:'BOTTLENECK',severity:'MEDIUM',icon:'⚠️',
+            title:'Memory-Bound Workload',
+            message:`${r.memUtil.toFixed(0)}% memory BW utilized but only ${r.computeUtil.toFixed(0)}% compute. GPU potential wasted.`,
+            suggestions:[
+                'Consider HBM-rich hardware (MI300X 5.3TB/s, GB200 8TB/s)',
+                'Increase batch size to improve compute utilization',
+                'Use lower precision (FP8/INT8) to reduce memory traffic'
+            ]
+        });
+    }
+    if(r.computeUtil > 90 && r.memUtil < 50) {
+        info.push({type:'BOTTLENECK',severity:'LOW',icon:'ℹ️',
+            title:'Compute-Bound (Ideal)',
+            message:`Compute utilization ${r.computeUtil.toFixed(0)}%. Hardware is well-matched to workload.`,
+            suggestions:['GPU compute capability is being used effectively']
+        });
+    }
+
+    // 4. BATCH SIZE OPTIMIZATION
+    const model = MODEL_DB[r.modelKey];
+    if(model && r.fitsInMem) {
+        // Calculate optimal: fill ~80% of memory
+        const memForKV = (r.memCap * 0.8) - r.modelMem;
+        const kvPerBatch = r.kvCacheGB / Math.max(r.batch, 1);
+        const optimalBatch = kvPerBatch > 0 ? Math.floor(memForKV / kvPerBatch) : r.batch;
+        if(r.batch < optimalBatch * 0.3 && optimalBatch > 4) {
+            warnings.push({type:'EFFICIENCY',severity:'MEDIUM',icon:'💡',
+                title:'Batch Size Too Small',
+                message:`Batch size ${r.batch} is much lower than optimal (~${Math.min(optimalBatch, 256)}). GPU underutilized.`,
+                suggestions:[`Increase batch to ${Math.min(optimalBatch, 256)} for better throughput`,
+                    'If latency-sensitive, consider smaller/cheaper GPU',
+                    'For serving, accumulate requests to fill larger batches']
+            });
+        }
+    }
+
+    // 5. ECONOMIC VALIDATION
+    const costPerToken = r.tokPerSec > 0 ? (r.totalPower * r.elecRate / 3600000 / r.tokPerSec * 1000) : 999;
+    if(costPerToken > 0.01 && r.tokPerSec > 0) {
+        warnings.push({type:'ECONOMICS',severity:'HIGH',icon:'💰',
+            title:'Very High Cost Per Token',
+            message:`$${costPerToken.toFixed(4)}/token is well above industry standard (~$0.001).`,
+            suggestions:['Optimize batch size','Review hardware selection','Check if quantization reduces cost',
+                'Compare with cloud API pricing (OpenAI/Anthropic: $0.001-0.003/token)']
+        });
+    }
+    // Utilization check
+    if(r.computeUtil < 20 && r.memUtil < 20 && r.wtype !== 'agentic') {
+        warnings.push({type:'ECONOMICS',severity:'MEDIUM',icon:'💰',
+            title:'Severe Underutilization',
+            message:`Compute: ${r.computeUtil.toFixed(0)}%, Memory: ${r.memUtil.toFixed(0)}%. Hardware is mostly idle.`,
+            suggestions:['Select a smaller, cheaper GPU for this workload','Increase batch size to improve utilization',
+                'This configuration is wasting resources']
+        });
+    }
+
+    // 6. PRECISION COMPATIBILITY
+    if(r.prec === 'fp4' && !r.isBlackwell) {
+        errors.push({type:'COMPATIBILITY',severity:'CRITICAL',icon:'🔴',
+            title:'FP4/MXFP4 Unavailable',
+            message:`FP4 precision requires Blackwell architecture (B100/B200/GB200). Auto-fallback to FP8 applied.`,
+            suggestions:['Use FP8 or FP16 instead','Upgrade to Blackwell hardware for FP4 support']
+        });
+    }
+    if(r.prec === 'fp8') {
+        const noFP8 = ['a100','gaudi2','edge-tpu','jetson-orin-nx','jetson-agx-orin','cloud-ai-100',
+                        'core-ultra','ryzen-ai','snapdragon-x','apple-m4','tpu-v5p'];
+        if(noFP8.includes(r.preset)) {
+            warnings.push({type:'COMPATIBILITY',severity:'HIGH',icon:'🟠',
+                title:'FP8 May Not Be Natively Supported',
+                message:`${HW_DB[r.preset] ? HW_DB[r.preset].name : r.preset} may not have native FP8 Tensor Core support. Performance may be emulated at FP16 speeds.`,
+                suggestions:['Use FP16 for guaranteed native support','Upgrade to Hopper/Blackwell for native FP8']
+            });
+        }
+    }
+
+    // 7. QUANTIZATION SUGGESTIONS
+    if(r.fitsInMem && r.totalMemRequired > r.memCap * 0.7 && (r.prec === 'fp16' || r.prec === 'fp32')) {
+        info.push({type:'OPTIMIZATION',severity:'LOW',icon:'💡',
+            title:'Consider Quantization',
+            message:`Using ${((r.totalMemRequired/r.memCap)*100).toFixed(0)}% memory at ${r.prec.toUpperCase()}. Quantization could help.`,
+            suggestions:[`INT8/FP8: ~50% memory reduction, <1% accuracy loss`,
+                `Enables larger batch sizes or bigger models`]
+        });
+    }
+
+    // 8. CLOUD-ONLY HARDWARE TCO
+    const hwData = HW_DB[r.preset];
+    if(hwData && hwData.cloudOnly) {
+        info.push({type:'TCO',severity:'LOW',icon:'ℹ️',
+            title:'Cloud-Only Hardware',
+            message:`${hwData.name} is only available as a cloud service. TCO calculations use cloud hourly rates, not hardware purchase.`,
+            suggestions:[hwData.tooltip || 'Check cloud provider pricing for current rates']
+        });
+    }
+
+    // 9. DIE SIZE WARNING
+    const dieSize = r.cores * (r.node === '2nm' ? 0.03 : r.node === '3nm' ? 0.035 : r.node === '5nm' ? 0.05 : 0.08);
+    if(dieSize > 1000 && r.pkg === 'monolithic') {
+        errors.push({type:'FABRICATION',severity:'CRITICAL',icon:'🔴',
+            title:'Die Size Exceeds Reticle Limit',
+            message:`~${dieSize.toFixed(0)}mm² too large for monolithic die. Must use chiplet/multi-die architecture.`,
+            suggestions:['Switch to 2.5D CoWoS or 3D stacking','Reduce core count','Use smaller process node']
+        });
+    } else if(dieSize > 800 && r.pkg === 'monolithic') {
+        warnings.push({type:'FABRICATION',severity:'MEDIUM',icon:'🟡',
+            title:'Die Size Near Reticle Limit',
+            message:`~${dieSize.toFixed(0)}mm² is approaching reticle limit (~800mm²). Yield will be very low.`,
+            suggestions:['Consider chiplet architecture for better yield','Move to smaller process node']
+        });
+    }
+
+    // 10. THERMAL
+    if(r.jTemp > 85 && !r.thermalThrottle) {
+        warnings.push({type:'THERMAL',severity:'MEDIUM',icon:'🟡',
+            title:'High Junction Temperature',
+            message:`${r.jTemp.toFixed(0)}°C approaching throttle threshold (90°C).`,
+            suggestions:['Upgrade cooling solution','Reduce TDP or clock frequency']
+        });
+    }
+
+    // 11. GPU COUNT SCALING
+    if(r.gpuCount > 64) {
+        warnings.push({type:'SCALING',severity:'MEDIUM',icon:'🟡',
+            title:'Large GPU Cluster',
+            message:`${r.gpuCount} GPUs may see diminishing returns from communication overhead.`,
+            suggestions:['Linear scaling assumed — real-world efficiency is 70-85% at this scale',
+                'Ensure high-speed interconnect (NVLink/UALink) between all GPUs',
+                'Consider tensor + pipeline parallelism strategies']
+        });
+    }
+    if(r.gpuCount >= 1000) {
+        info.push({type:'SCALING',severity:'LOW',icon:'ℹ️',
+            title:'Enterprise-Scale Deployment',
+            message:`${r.gpuCount} GPUs is a major datacenter deployment. Monthly power cost: $${formatNum(r.totalPowerCost / (r.years * 12))}.`,
+            suggestions:['Ensure dedicated power and cooling infrastructure',
+                'Consider multi-datacenter deployment for resilience']
+        });
+    }
+
+    return {errors, warnings, info};
+}
+
+function updateWarningsPanel() {
+    const r = simResult;
+    const validation = validateConfiguration(r);
+    let h = '';
+
+    // Overall status badge
+    if(validation.errors.length > 0) {
+        h += '<div class="wb wc" style="font-size:10px;padding:6px 10px;font-weight:700;text-align:center;">🔴 INVALID CONFIGURATION — ' + validation.errors.length + ' critical issue(s)</div>';
+    } else if(validation.warnings.length > 0) {
+        h += '<div class="wb ww" style="font-size:10px;padding:6px 10px;font-weight:700;text-align:center;">🟡 CAUTION — ' + validation.warnings.length + ' warning(s)</div>';
+    } else {
+        h += '<div class="wb wo" style="font-size:10px;padding:6px 10px;font-weight:700;text-align:center;">🟢 OPTIMAL CONFIGURATION</div>';
+    }
+
+    // Show errors
+    validation.errors.forEach(v => {
+        h += `<div class="wb wc" style="font-size:9px;padding:6px 8px;">
+            <div style="font-weight:700;margin-bottom:3px;">${v.icon} ${v.title}</div>
+            <div style="margin-bottom:4px;">${v.message}</div>
+            ${v.suggestions.length > 0 ? '<div style="opacity:0.85;"><b>Fix:</b> ' + v.suggestions.map(s => '✅ ' + s).join(' | ') + '</div>' : ''}
+        </div>`;
+    });
+
+    // Show warnings
+    validation.warnings.forEach(v => {
+        h += `<div class="wb ww" style="font-size:9px;padding:6px 8px;">
+            <div style="font-weight:700;margin-bottom:3px;">${v.icon} ${v.title}</div>
+            <div style="margin-bottom:4px;">${v.message}</div>
+            ${v.suggestions.length > 0 ? '<div style="opacity:0.85;"><b>Suggestions:</b> ' + v.suggestions.map(s => '• ' + s).join(' | ') + '</div>' : ''}
+        </div>`;
+    });
+
+    // Show info
+    validation.info.forEach(v => {
+        h += `<div class="wb wi" style="font-size:9px;padding:5px 8px;">
+            <div style="font-weight:700;margin-bottom:2px;">${v.icon} ${v.title}</div>
+            <div>${v.message}</div>
+            ${v.suggestions.length > 0 ? '<div style="opacity:0.8;font-size:8px;margin-top:2px;">' + v.suggestions.join(' | ') + '</div>' : ''}
+        </div>`;
+    });
+
+    if(validation.errors.length === 0 && validation.warnings.length === 0 && validation.info.length === 0) {
         h += '<div class="wb wo">🟢 All parameters within normal ranges.</div>';
     }
-    warnings.forEach(w => {
-        const cls = w.level === 'critical' ? 'wc' : (w.level === 'warning' ? 'ww' : 'wi');
-        const icon = w.level === 'critical' ? '🔴' : (w.level === 'warning' ? '🟡' : '🟢');
-        h += `<div class="wb ${cls}" style="font-size:9px;padding:5px 8px;">${icon} ${w.text}</div>`;
-    });
 
     $('panel-warnings').innerHTML = h;
 }
