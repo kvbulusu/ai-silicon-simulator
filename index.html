@@ -548,12 +548,12 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 </div>
 
-<!-- Chapter 10 -->
+<!-- Chapter 4 -->
 <div class="lab-exercise">
-<h3>📘 Chapter 10: Memory Subsystems</h3>
+<h3>📘 Chapter 4: Memory Subsystems</h3>
 
 <div class="exercise-card">
-<h4>Exercise 10.1: Memory Wall Diagnosis</h4>
+<h4>Exercise 4.1: Memory Wall Diagnosis</h4>
 <p><strong>Scenario:</strong> Your LLaMA 3 70B inference is running slower than expected on H100.</p>
 <p><strong>Task:</strong></p>
 <ol>
@@ -645,12 +645,12 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 </div>
 </div>
 
-<!-- Chapter 16 -->
+<!-- Chapter 18 -->
 <div class="lab-exercise">
-<h3>📘 Chapter 16: Custom Silicon</h3>
+<h3>📘 Chapter 18: Custom Silicon</h3>
 
 <div class="exercise-card">
-<h4>Exercise 16.1: Build vs Buy Decision</h4>
+<h4>Exercise 18.1: Build vs Buy Decision</h4>
 <p><strong>Scenario:</strong> You're a startup considering custom silicon for your AI accelerator product.</p>
 <p><strong>Given:</strong></p>
 <ul>
@@ -735,7 +735,7 @@ Configure hardware and workload above to see analysis.
 
 <script>
 const HW_DB = {"h100": {"name": "NVIDIA H100 SXM5", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3", "memBW": 3350, "memCap": 80, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 25000}, "h200": {"name": "NVIDIA H200", "node": "5nm", "pkg": "2.5d", "freq": 1980, "tdp": 700, "memType": "hbm3e", "memBW": 4800, "memCap": 141, "cores": 16896, "interconnect": "nvlink4", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 30000}, "b100": {"name": "NVIDIA B100", "node": "4nm", "pkg": "2.5d", "freq": 1800, "tdp": 700, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 18432, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 35000}, "b200": {"name": "NVIDIA B200", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 40000}, "a100": {"name": "NVIDIA A100 PCIe", "node": "7nm", "pkg": "monolithic", "freq": 1410, "tdp": 400, "memType": "hbm2e", "memBW": 2000, "memCap": 80, "cores": 6912, "interconnect": "pcie5", "precision": "fp16", "cooling": "air", "category": "datacenter", "year": 2020, "costEst": 10000}, "mi300x": {"name": "AMD MI300X", "node": "5nm", "pkg": "3d", "freq": 1700, "tdp": 750, "memType": "hbm3", "memBW": 5300, "memCap": 192, "cores": 19456, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 22000}, "mi350": {"name": "AMD MI350", "node": "3nm", "pkg": "3d", "freq": 1900, "tdp": 750, "memType": "hbm3e", "memBW": 6000, "memCap": 288, "cores": 20480, "interconnect": "ualink", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 28000}, "gaudi3": {"name": "Intel Gaudi 3", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 600, "memType": "hbm2e", "memBW": 3700, "memCap": 128, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 15000}, "jetson-orin-nx": {"name": "Jetson Orin NX", "node": "7nm", "pkg": "monolithic", "freq": 918, "tdp": 25, "memType": "lpddr5", "memBW": 100, "memCap": 16, "cores": 1024, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 500}, "jetson-agx-orin": {"name": "Jetson AGX Orin", "node": "7nm", "pkg": "monolithic", "freq": 1300, "tdp": 60, "memType": "lpddr5", "memBW": 205, "memCap": 64, "cores": 2048, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 1200}, "cloud-ai-100": {"name": "Qualcomm Cloud AI 100", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 75, "memType": "ddr5", "memBW": 134, "memCap": 32, "cores": 4096, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "edge", "year": 2023, "costEst": 800}, "edge-tpu": {"name": "Google Edge TPU", "node": "14nm", "pkg": "monolithic", "freq": 500, "tdp": 4, "memType": "ddr5", "memBW": 8, "memCap": 2, "cores": 256, "interconnect": "usb", "precision": "int8", "cooling": "passive", "category": "edge", "year": 2022, "costEst": 75}, "core-ultra": {"name": "Intel Core Ultra NPU", "node": "7nm", "pkg": "monolithic", "freq": 1400, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 400, "tops": 34}, "ryzen-ai": {"name": "AMD Ryzen AI NPU", "node": "4nm", "pkg": "monolithic", "freq": 1600, "tdp": 28, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 350, "tops": 16}, "snapdragon-x": {"name": "Snapdragon X Elite NPU", "node": "4nm", "pkg": "monolithic", "freq": 1800, "tdp": 23, "memType": "lpddr5", "memBW": 68, "memCap": 32, "cores": 512, "interconnect": "pcie5", "precision": "int8", "cooling": "air", "category": "aipc", "year": 2024, "costEst": 500, "tops": 45}, "apple-m4": {"name": "Apple M4 Neural Engine", "node": "3nm", "pkg": "monolithic", "freq": 2000, "tdp": 22, "memType": "lpddr5", "memBW": 120, "memCap": 32, "cores": 384, "interconnect": "pcie5", "precision": "fp16", "cooling": "passive", "category": "aipc", "year": 2024, "costEst": 600, "tops": 18}, "gb200": {"name": "NVIDIA GB200 NVL72", "node": "4nm", "pkg": "2.5d", "freq": 2100, "tdp": 1000, "memType": "hbm3e", "memBW": 8000, "memCap": 192, "cores": 20480, "interconnect": "nvlink5", "precision": "fp4", "cooling": "liquid", "category": "datacenter", "year": 2025, "costEst": 60000}, "gaudi2": {"name": "Intel Gaudi 2", "node": "7nm", "pkg": "2.5d", "freq": 1350, "tdp": 600, "memType": "hbm2e", "memBW": 2450, "memCap": 96, "cores": 4096, "interconnect": "pcie5", "precision": "fp16", "cooling": "liquid", "category": "datacenter", "year": 2023, "costEst": 12000}, "tpu-v5p": {"name": "Google TPU v5p", "node": "7nm", "pkg": "2.5d", "freq": 1750, "tdp": 250, "memType": "hbm2e", "memBW": 2760, "memCap": 95, "cores": 8192, "interconnect": "pcie5", "precision": "int8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 0, "cloudOnly": true, "tooltip": "2.76 TB/s HBM bandwidth; 4.8 TB/s is ICI interconnect bandwidth between chips, not memory BW"}, "trainium2": {"name": "AWS Trainium2", "node": "5nm", "pkg": "2.5d", "freq": 1500, "tdp": 500, "memType": "hbm3e", "memBW": 2460, "memCap": 96, "cores": 8192, "interconnect": "pcie5", "precision": "fp8", "cooling": "liquid", "category": "datacenter", "year": 2024, "costEst": 0, "cloudOnly": true, "tooltip": "96GB per chip; multi-chip UltraServer pods scale to 512GB+"}};
-const MODEL_DB = {"llama3-8b": {"name": "LLaMA 3 8B", "params": 8000000000.0, "memGB": 16, "intensity": 0.15, "batchDefault": 64}, "mistral-7b": {"name": "Mistral 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.15, "batchDefault": 64}, "gemma-7b": {"name": "Gemma 7B", "params": 7000000000.0, "memGB": 14, "intensity": 0.14, "batchDefault": 64}, "llama3-70b": {"name": "LLaMA 3 70B", "params": 70000000000.0, "memGB": 140, "intensity": 0.12, "batchDefault": 32}, "mixtral-8x7b": {"name": "Mixtral 8\u00d77B", "params": 47000000000.0, "memGB": 94, "intensity": 0.13, "batchDefault": 32}, "yi-34b": {"name": "Yi 34B", "params": 34000000000.0, "memGB": 68, "intensity": 0.13, "batchDefault": 32}, "gpt35-scale": {"name": "GPT-3.5 Scale (~175B)", "params": 175000000000.0, "memGB": 350, "intensity": 0.1, "batchDefault": 16}, "gpt4-scale": {"name": "GPT-4 Scale (~1.8T MoE)", "params": 1800000000000.0, "memGB": 3600, "intensity": 0.08, "batchDefault": 8}, "llava-13b": {"name": "LLaVA 13B", "params": 13000000000.0, "memGB": 26, "intensity": 0.18, "batchDefault": 32}, "llama3-405b": {"name": "LLaMA 3.1 405B", "params": 405000000000.0, "memGB": 810, "intensity": 0.09, "batchDefault": 4}};
+const MODEL_DB = {"llama3-8b": {"name": "LLaMA 3 8B", "layers": 32, "kvDim": 1024, "params": 8000000000.0, "memGB": 16, "intensity": 0.15, "batchDefault": 64}, "mistral-7b": {"name": "Mistral 7B", "layers": 32, "kvDim": 1024, "params": 7000000000.0, "memGB": 14, "intensity": 0.15, "batchDefault": 64}, "gemma-7b": {"name": "Gemma 7B", "layers": 28, "kvDim": 4096, "params": 7000000000.0, "memGB": 14, "intensity": 0.14, "batchDefault": 64}, "llama3-70b": {"name": "LLaMA 3 70B", "layers": 80, "kvDim": 1024, "params": 70000000000.0, "memGB": 140, "intensity": 0.12, "batchDefault": 32}, "mixtral-8x7b": {"name": "Mixtral 8\u00d77B", "layers": 32, "kvDim": 1024, "params": 47000000000.0, "memGB": 94, "intensity": 0.13, "batchDefault": 32}, "yi-34b": {"name": "Yi 34B", "params": 34000000000.0, "memGB": 68, "intensity": 0.13, "batchDefault": 32}, "gpt35-scale": {"name": "GPT-3.5 Scale (~175B)", "layers": 96, "kvDim": 12288, "params": 175000000000.0, "memGB": 350, "intensity": 0.1, "batchDefault": 16}, "gpt4-scale": {"name": "GPT-4 Scale (~1.8T MoE)", "params": 1800000000000.0, "memGB": 3600, "intensity": 0.08, "batchDefault": 8}, "llava-13b": {"name": "LLaVA 13B", "layers": 40, "kvDim": 5120, "params": 13000000000.0, "memGB": 26, "intensity": 0.18, "batchDefault": 32}, "llama3-405b": {"name": "LLaMA 3.1 405B", "layers": 126, "kvDim": 1024, "params": 405000000000.0, "memGB": 810, "intensity": 0.09, "batchDefault": 4}};
 
 // ============================================
 // STATE
@@ -842,14 +842,14 @@ function loadCaseStudy() {
     const cases = {
         'cs-h100-cluster': {preset:'h100',wtype:'inference-decode',desc:'Chapter 8: Analyze H100 cluster power draw at 700W TDP with liquid cooling. Observe thermal behavior and power efficiency.'},
         'cs-dvfs': {preset:'h100',wtype:'inference-decode',desc:'Chapter 8: Try changing clock from 2000→1200 MHz. Watch power drop quadratically while perf drops linearly. This is DVFS.', freq:2000},
-        'cs-hbm-compare': {preset:'h100',wtype:'inference-decode',desc:'Chapter 10: Compare HBM3 vs HBM3e vs HBM4. Switch memory type and observe throughput impact on memory-bound workloads.'},
+        'cs-hbm-compare': {preset:'h100',wtype:'inference-decode',desc:'Chapter 4: Compare HBM3 vs HBM3e vs HBM4. Switch memory type and observe throughput impact on memory-bound workloads.'},
         'cs-bottleneck': {preset:'h100',wtype:'inference-decode',desc:'Chapter 11: Switch between prefill (compute-bound) and decode (memory-bound) to see how bottleneck shifts on roofline.'},
         'cs-agentic': {preset:'h100',wtype:'agentic',desc:'Chapter 14: Compare agentic AI (21% GPU util) vs traditional inference (90% GPU util). See the economics shift.'},
-        'cs-buildvbuy': {preset:'h100',wtype:'inference-decode',desc:'Chapter 16: Compare buying H100s vs designing custom silicon. When does build make sense? Check the Economics tab.'},
+        'cs-buildvbuy': {preset:'h100',wtype:'inference-decode',desc:'Chapter 18, Exercise 18.1: Compare buying H100s vs designing custom silicon. When does build make sense? Check the Economics tab.'},
         'ex-dvfs': {preset:'h100',wtype:'inference-decode',desc:'Exercise 8.1: Slide clock frequency from 800→2200 MHz. Note how power scales with V²f while perf scales linearly.',freq:800},
         'ex-iceberg': {preset:'h100',wtype:'inference-decode',desc:'Exercise 8.2: Check the Economics tab → Power Iceberg. Adjust PUE to see how facility overhead multiplies chip power cost.'},
-        'ex-memhier': {preset:'h100',wtype:'inference-decode',desc:'Exercise 10.1: Switch memory from DDR5→HBM3→HBM3e→HBM4. Watch the memory ceiling rise on the roofline.'},
-        'ex-hbmcost': {preset:'a100',wtype:'inference-decode',desc:'Exercise 10.2: Compare A100 (HBM2e) vs H200 (HBM3e) in Economics tab for cost-performance analysis.'},
+        'ex-memhier': {preset:'h100',wtype:'inference-decode',desc:'Chapter 4, Exercise 4.1: Switch memory from DDR5→HBM3→HBM3e→HBM4. Watch the memory ceiling rise on the roofline.'},
+        'ex-hbmcost': {preset:'a100',wtype:'inference-decode',desc:'Chapter 4: Compare A100 (HBM2e) vs H200 (HBM3e) in Economics tab for cost-performance analysis.'},
         'ex-workload': {preset:'h100',wtype:'inference-decode',desc:'Exercise 11.1: Switch workload types and observe which resource becomes the bottleneck. Check Analysis tab.'},
         'ex-agentic': {preset:'h100',wtype:'agentic',desc:'Exercise 11.2: Open Agentic AI tab. Compare GPU utilization and cost per query vs traditional inference.'},
     };
@@ -1030,12 +1030,22 @@ function runSim() {
     else if(prec === 'fp32') modelMem = modelMem * 2;
     
     // Calculate KV cache memory (assumes 2048 context length per request)
+    // GQA-aware: KV bytes/token = 2 * layers * kvDim * precision_bytes,
+    // where kvDim = n_kv_heads * head_dim (KV hidden size per layer).
     const modelParams = model ? model.params : 70e9;
     const contextLength = 2048; // Default context length
-    const numLayers = Math.sqrt(modelParams / 1e9) * 8; // Rough estimate
-    const hiddenSize = Math.sqrt(modelParams / numLayers);
-    const kvCacheBytesPerToken = 2 * numLayers * hiddenSize * pb; // 2 for K+V
-    const kvCacheGB = (batch * contextLength * kvCacheBytesPerToken) / (1024 ** 3);
+    let kvCacheBytesPerToken;
+    if (model && model.layers && model.kvDim) {
+        kvCacheBytesPerToken = 2 * model.layers * model.kvDim * pb; // 2 for K+V
+    } else {
+        // Fallback estimator: params ~= 12 * L * d^2  =>  d = sqrt(params / (12 * L))
+        // (MHA assumption; overestimates GQA models, so prefer explicit specs above)
+        const numLayers = Math.sqrt(modelParams / 1e9) * 8; // Rough estimate
+        const hiddenSize = Math.sqrt(modelParams / (12 * numLayers));
+        kvCacheBytesPerToken = 2 * numLayers * hiddenSize * pb; // 2 for K+V
+    }
+    // Decimal GB to match vendor specs (memCap/memGB are decimal, e.g. HBM 80 GB)
+    const kvCacheGB = (batch * contextLength * kvCacheBytesPerToken) / 1e9;
     
     const totalMemRequired = modelMem + kvCacheGB;
     const fitsInMem = totalMemRequired <= memCap;
@@ -1045,7 +1055,11 @@ function runSim() {
     // Decode: memory-bound → memBW_bytes / (model_bytes_per_token)
     // Each token generation reads full model weights once: params * bytes_per_param
     const modelBytesPerParam = pb;
-    const decodeTokPerSecPerUser = memBW * 1e9 / (modelParams * modelBytesPerParam);
+    // Decode memory traffic per step: full weights + full KV cache are re-read every
+    // token (Chapter 3: BW/token = (Parameters + KV Cache) / target_latency).
+    const kvTotalPerRequest = kvCacheBytesPerToken * contextLength;
+    const bytesPerToken = modelParams * modelBytesPerParam + kvTotalPerRequest;
+    const decodeTokPerSecPerUser = memBW * 1e9 / bytesPerToken;
     const decodeTokPerSec = decodeTokPerSecPerUser * Math.min(batch, 128);
     const tokPerSec = wtype.includes('prefill') || wtype === 'training' ? prefillTokPerSec : decodeTokPerSec;
     const latencyPerTok = decodeTokPerSec > 0 ? (1000 / (decodeTokPerSec / batch)) : 999;
