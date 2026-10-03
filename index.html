@@ -588,7 +588,7 @@ Explore trade-offs between <b style="color:#f4f4f5">silicon</b>, <b style="color
 <h3>📘 Chapter 11: Workload Characterization</h3>
 
 <div class="exercise-card">
-<h4>Exercise 11.1: Bottleneck Identification</h4>
+<h4>Bottleneck Identification</h4>
 <p><strong>Scenario:</strong> You're comparing three workloads and need to identify bottlenecks.</p>
 <p><strong>Task:</strong> For each workload, identify the primary bottleneck:</p>
 <ol>
@@ -850,8 +850,8 @@ function loadCaseStudy() {
         'ex-iceberg': {preset:'h100',wtype:'inference-decode',desc:'Exercise 8.2: Check the Economics tab → Power Iceberg. Adjust PUE to see how facility overhead multiplies chip power cost.'},
         'ex-memhier': {preset:'h100',wtype:'inference-decode',desc:'Chapter 4, Exercise 4.1: Switch memory from DDR5→HBM3→HBM3e→HBM4. Watch the memory ceiling rise on the roofline.'},
         'ex-hbmcost': {preset:'a100',wtype:'inference-decode',desc:'Chapter 4: Compare A100 (HBM2e) vs H200 (HBM3e) in Economics tab for cost-performance analysis.'},
-        'ex-workload': {preset:'h100',wtype:'inference-decode',desc:'Exercise 11.1: Switch workload types and observe which resource becomes the bottleneck. Check Analysis tab.'},
-        'ex-agentic': {preset:'h100',wtype:'agentic',desc:'Exercise 11.2: Open Agentic AI tab. Compare GPU utilization and cost per query vs traditional inference.'},
+        'ex-workload': {preset:'h100',wtype:'inference-decode',desc:'Switch workload types and observe which resource becomes the bottleneck. Check Analysis tab.'},
+        'ex-agentic': {preset:'h100',wtype:'agentic',desc:'Open Agentic AI tab. Compare GPU utilization and cost per query vs traditional inference.'},
     };
     const c = cases[cs];
     if(!c) {$('case-desc').textContent=''; return;}
